@@ -1,19 +1,29 @@
 from pathlib import Path
 import os
 
+# file-crud-revamp branch
+
 # Path Definitions
 usersPath = "data/users.csv"
 userEntriesPath = "data/userentries/{}.csv"
 passwordIndex = 4
 
-# Functions
+# Global variables
+userCount : int = 10 # Placeholder
+userEntryCount : int = 5 # Placeholder
 
+# Dictionary Initialization [Attempt - NOT FINAL]
+users : dict = [dict(userName = "", password = "") for x in range(userCount)]
+userEntries : dict = [dict(entryName = "", entryType = "", entryDescription = "", entryContent = "") for x in range(userEntryCount)]
+
+# Functions
 def fileExists(mode, username):
     if (mode == 1):
         return os.path.exists(usersPath)
     else:
         return os.path.exists(userEntriesPath.format(username))
 
+# *CREATE - Establishes File Structure
 def create(createFunc : int, username : str, password : str, information : str = "information"):
 
     match createFunc:
@@ -44,9 +54,8 @@ def create(createFunc : int, username : str, password : str, information : str =
             writeFile.write("{},".format(information))
             writeFile.close()
 
-
+# READ - Manages Data Dictionaries for Data Retrieval
 def read(readFunc : int, username : str = "default", password : str = "default", setIndex : int = 1):
-    #TODO Maybe Use Dictionaries for Data Retrieval
     returnUsers : dict = {}
     returnUserEntries : dict = {}
     if (not fileExists(1) or not fileExists(2, username)):
@@ -83,7 +92,6 @@ def read(readFunc : int, username : str = "default", password : str = "default",
                     pass
                 else:
                     if ((x+1) % passwordIndex == 0):
-                        
                         returnInformation = "{}\n\n{}".format(returnInformation, informationSet[x-1])
                     else:
                         returnInformation = "{}\n{}".format(returnInformation, informationSet[x-1])
@@ -102,7 +110,7 @@ def read(readFunc : int, username : str = "default", password : str = "default",
 
             x = startingIndex
             while (x < endIndex):
-                returnInformation = returnInformation + informationSet[x]
+                returnInformation = returnInformation + informationSet[x] + "\n"
                 x += 1
             readFile.close()
             return returnInformation
@@ -121,11 +129,11 @@ def read(readFunc : int, username : str = "default", password : str = "default",
             readFile.close()
             return 0
 
+# UPDATE - Updates the Data Dictionaries
 def update(updateFunc : int, username : str, informationToChange :str , newInformation : str, setIndex : int = 1, entryIndex : int = 0):
     # Assuming that the user exists and usernames are unique
     match updateFunc:
         case 1: # User Password Update
-            
             readFile = open("data/users.csv", 'r')
             users = readFile.read().split(",")
             userCheck = False
@@ -151,14 +159,14 @@ def update(updateFunc : int, username : str, informationToChange :str , newInfor
                 else:
                     print(user)
                     readFile.write("{},".format(user))
+
         case 2: # User Entry Update
             """
             Entry Details:
             1 - Name of Entry
             2 - Type of Entry
-            3 - Secondary Name of Entry (can be sensitive)
-            4 - Tertiary Name of Entry (can be sensitive)
-            5 - Sensitive Information
+            3 - Content of Entry
+            4 - Sensitive Information
             """
             readFile = open("data/userentries/{}.csv".format(username), 'r')
             informationSet = readFile.read().split(",")
@@ -178,6 +186,7 @@ def update(updateFunc : int, username : str, informationToChange :str , newInfor
                 if(information != ""):
                     readFile.write("{},".format(information))
 
+# *DELETE
 def delete(delFunc : int, username, password, delIndex : int = 1):
     match delFunc:
         case 1: # Delete User
@@ -188,8 +197,8 @@ def delete(delFunc : int, username, password, delIndex : int = 1):
                 # check username and password
                 if (username == user):
                     userCheck = True
-                    print("Username exists at {}".format(users.index(user)))
                     continue
+                
                 elif (userCheck == True and password == user):
                     print ("Account Exists. Password verified at {}".format(users.index(user)))
                     users[users.index(user)-1] = ""
@@ -213,10 +222,10 @@ def delete(delFunc : int, username, password, delIndex : int = 1):
             Entry Details:
             1 - Name of Entry
             2 - Type of Entry
-            3 - Secondary Name of Entry (can be sensitive)
-            4 - Tertiary Name of Entry (can be sensitive)
-            5 - Sensitive Information
+            3 - Content of Entry
+            4 - Sensitive Information
             """
+            
             readFile = open("data/userentries/{}.csv".format(username), 'r')
             informationSet = readFile.read().split(",")
 
