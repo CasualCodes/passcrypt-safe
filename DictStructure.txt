@@ -1,0 +1,15 @@
+dictStructure
+    users = {"username" : "___", "password" : "___"}
+    userEntry = {"entryname" : "___", "entrytype" : "___", "entrydescription" : "___", "entryContent" : "___"}
+
+dictlist = [dict() for x in range(n)]
+
+users = [dict(username = readName, password = readPassword) for x in range(userCount)]
+userEntries = [dict(entryname = readEntryName, entrytype = readEntryType, entrydescription = readEntryDescription) for x in range(userCount)]
+userEntry = [dict(entryname = readEntryName, entrytype = readEntryType, entrydescription = readEntryDescription, entryContent = readEntryContent) for x in range(passwordIndex)]
+
+process:
+1 - declare list with empty strings
+2 - populate variables
+3 - insert set of variables (dictionary) as one of the elements of the list
+4 - loop
