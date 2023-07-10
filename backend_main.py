@@ -10,22 +10,20 @@ import os
 import crud
 
 # GENERAL TODO
-# 1 - Use Dictionaries For Data Structuring
-# > 1 Dictionary for Users > 1 Dictionary Where NonSensitiveInformation is the Key and Sensitive Information is the Value
+# 1 - Finish Prototype Crud Implementation
+# 2 - Implement Encryption / Decryption of Files
 
 # Global Variables
-users : dict = {}
-userEntries : dict = {}
 
 # Screens
 def LoginScreen():
-    print("Welcome to Passcrypt Safe!\n\n")
+    print("Welcome to Passcrypt Safe!")
 
     while (True):
-        print("1 - Login")
+        print("\n1 - Login")
         print("2 - Signup")
         print("3 - Exit")
-        choice = input("> ")
+        choice = int(input("> "))
         passwordIncorrect = False
         accountAlreadyExists = False
         match choice:
@@ -33,7 +31,7 @@ def LoginScreen():
                 loginUsername = input("[Login] Enter Username: ")
                 loginPassword = input("[Login] Enter Password: ")
                 # Login Authentication/Verification
-                passwordIncorrect = crud.read(1, loginUsername, loginPassword)
+                passwordIncorrect = not crud.read(1, loginUsername, loginPassword)
                 if passwordIncorrect:
                     print("Invalid Login!\n\n")
                 else:
@@ -42,39 +40,44 @@ def LoginScreen():
                 signUpUsername = input("[Signup] Enter Username: ")
                 signUpPassword = input("[Signup] Enter Password: ")
                 # Signup Verification
-                crud.read(1, signUpUsername, signUpPassword)
+                accountAlreadyExists = crud.read(4, signUpUsername, signUpPassword)
                 if accountAlreadyExists:
                     print("Invalid Signup!\n\n")
                 else:
                     crud.create(1, signUpUsername, signUpPassword)
                     print("Account Successfully Created!\n\n")
             case 3:
-                print ("Thank you for using the Program!")
+                print ("\nThank you for using the Program!\n")
                 break
             case _:
-                print("Invalid Input\n\n")
+                print("Invalid Input")
 
 def MainScreen(username, password):
     # Load Required Information
     # TODO crud.read(displayAll) adjustments
     while (True):
-        print("Welcome User!")
+        print("\n\nWelcome {}!".format(username))
         print("1 - View Entries")
         print("2 - View User Settings")
         print("3 - Add Entry")
-        choice = input("> ")
+        choice = int(input("> "))
         match choice:
             case 1:
                 #Load Entries
                 print("Entries: ")
                 print("0 - Exit View Entries")
-                #crud.read(2, username,password)
-                print("Select Entry: ")
-                choice = input("> ")
-                if (choice != 0):
-                    openEntry(username, password, choice-1)
-                else:
+                if (crud.read(2, username,password) == False):
+                    print("Entries do not exist")
+                    print("Returning to Main Screen")
                     continue
+                else:
+                    print(crud.read(2, username,password))
+                    print("Select Entry: ")
+                    choice = int(input("> "))
+                    if (choice != 0):
+                        openEntry(username, password, choice-1)
+                    else:
+                        continue
             case 2:
                 option = UserSettingScreen(username, password)
                 if (option == 1):
@@ -94,13 +97,12 @@ def MainScreen(username, password):
 
 def UserSettingScreen(username, password):
     while (True):
-        print("{}".format(username))
-        print("Account Created") # ???
+        print("\n\n{}".format(username))
         print("1 - Edit Password")
         print("2 - Delete Account")
         print("3 - Logout")
         print("4 - Return to Main Screen")
-        choice = input("> ")
+        choice = int(input("> "))
         match choice:
             case 1:
                 oldPassword = input("Enter Old Password: ")
@@ -112,34 +114,48 @@ def UserSettingScreen(username, password):
                     print("Successfully Edited Password")
                 continue
             case 2:
-                crud.delete(1, username, password)
-                print("Delete Success: Returning to Login Screen")
-                return 1
+                oldPassword = input("Enter Old Password: ")
+                if oldPassword != password:
+                    print("Invalid!")
+                    continue
+                else:
+                    crud.delete(1, username, password)
+                    print("Delete Success: Returning to Login Screen")
+                    return 1
             case 3:
                 print("Logout Success: Returning to Login Screen")
                 return 1
             case 4:
                 return 2
+            case _:
+                print("Invalid Input")
 
-def EditViewScreen(a, b, c):
-    # load entry details
-    
-
-    print("Entry Name: ") # c.something
-    print("Entry Type: ") # c.something
-    print("...")        # c.something
+def EditViewScreen(username, password, informationSet, setIndex):
+    choice = int(input("Which to edit?:\n1 - Entry Name\n2 - Entry Type\n3 - Entry Description\n4 - Entry Content\n> "))
+    if (choice == 1 or choice == 2 or choice == 3 or choice == 4):
+        newInformation = input("Enter New Information: ")
+        crud.update(2, username, informationSet[choice-1], newInformation, setIndex)
+    else:
+        print("Invalid Input - Returning to Entry View")
 
 # systems
-def openEntry(a,b,c):
-    # Load entry as c
-    d = c #converted to dictionary
-    EditViewScreen(a, b, d)
-
-def initUser():
-    pass
-
-def initUserEntries(username):
-    pass
+def openEntry(username, password, setIndex):
+    informationSet = crud.read(3, username, password, setIndex).split(",")
+    print("Entry Name: {}\n Entry Type : {}\n Entry Description: {}\n Entry Content: {}\n\n".format(
+        informationSet[0],informationSet[1],informationSet[2],informationSet[3]
+    ))
+    while (True):
+        choice = int(input("Options: \n1 - Edit Entry\n2 - Delete Entry\n3 - Close Entry\n> "))
+        match choice:
+            case 1:
+                EditViewScreen(username, password, informationSet, setIndex)
+                return
+            case 2:
+                crud.delete(2, username, password, setIndex)
+            case 3:
+                return
+            case _:
+                print("Invalid Input")
 
 def main(mode : int = 1):
     # TODO User Navigation
@@ -147,8 +163,7 @@ def main(mode : int = 1):
     if (mode == 1):
         LoginScreen()
     else:
-        print("Testing Mode:")
-        # CRUD Testing Ground
+        print("CRUD Testing Mode:")
         #crud.create(1, "username", "password")
         #crud.create(1, "newUser", "newPassword")
         #crud.create(2, "newUser", "newPassword", "Gmail,Account,Gmail@gmail.com,Account For Gmail,password12345678,1,2,3,4,5")

@@ -17,7 +17,7 @@ users : dict = [dict(userName = "", password = "") for x in range(userCount)]
 userEntries : dict = [dict(entryName = "", entryType = "", entryDescription = "", entryContent = "") for x in range(userEntryCount)]
 
 # Functions
-def fileExists(mode, username):
+def fileExists(mode, username : str = "default"):
     if (mode == 1):
         return os.path.exists(usersPath)
     else:
@@ -56,14 +56,11 @@ def create(createFunc : int, username : str, password : str, information : str =
 
 # READ - Manages Data Dictionaries for Data Retrieval
 def read(readFunc : int, username : str = "default", password : str = "default", setIndex : int = 1):
-    returnUsers : dict = {}
-    returnUserEntries : dict = {}
     if (not fileExists(1) or not fileExists(2, username)):
-        print("Existence Error")
-        return -1
+        return False
 
     match readFunc:
-        case 1: # Check for Match (User Authentication / Signup Validation)
+        case 1: # (Bool) Check for Match (User Authentication / Signup Validation)
             readFile = open("data/users.csv", 'r')
             users = readFile.read().split(",")
             userCheck = False
@@ -74,33 +71,35 @@ def read(readFunc : int, username : str = "default", password : str = "default",
                     userCheck = True
                     continue
                 elif (userCheck == True and password == user):
-                    return 1 # Account Found
+                    return True # Account Found
                 else:
                     userCheck = False
             
             readFile.close()
-            return 0 # Account Not Found
+            return False # Account Not Found
 
-        case 2: # All Nonsensitive Data Retrieval (Main Window Display)
+        case 2: # (String) All Nonsensitive Data Retrieval (Main Window Display)
             readFile = open("data/userentries/{}.csv".format(username), 'r')
             informationSet = readFile.read().split(",")
             returnInformation = ""
 
             x = 1
+            y = 0
             while (x < len(informationSet)):
                 if (x % passwordIndex == 0):
                     pass
                 else:
                     if ((x+1) % passwordIndex == 0):
-                        returnInformation = "{}\n\n{}".format(returnInformation, informationSet[x-1])
+                        returnInformation += "{} - {}\n\n".format(y+1, informationSet[x-1])
+                        y += 1
                     else:
-                        returnInformation = "{}\n{}".format(returnInformation, informationSet[x-1])
+                        returnInformation += "{} - {} ".format(y+1, informationSet[x-1])
                 x += 1
 
             readFile.close()
             return returnInformation
         
-        case 3: # Specific Set Data Retrieval
+        case 3: # (String) Specific Set Data Retrieval
             readFile = open("data/userentries/{}.csv".format(username), 'r')
             informationSet = readFile.read().split(",")
             returnInformation : str = ""
@@ -110,12 +109,12 @@ def read(readFunc : int, username : str = "default", password : str = "default",
 
             x = startingIndex
             while (x < endIndex):
-                returnInformation = returnInformation + informationSet[x] + "\n"
+                returnInformation = returnInformation + informationSet[x] + ","
                 x += 1
             readFile.close()
             return returnInformation
 
-        case 4: # Duplicate username check
+        case 4: # (Bool) Duplicate username check
             readFile = open("data/users.csv", 'r')
             users = readFile.read().split(",")
             userCheck = False
@@ -124,10 +123,10 @@ def read(readFunc : int, username : str = "default", password : str = "default",
                 # check username and password
                 if (username == user):
                     userCheck = True
-                    return 1
+                    return True
             
             readFile.close()
-            return 0
+            return False
 
 # UPDATE - Updates the Data Dictionaries
 def update(updateFunc : int, username : str, informationToChange :str , newInformation : str, setIndex : int = 1, entryIndex : int = 0):
