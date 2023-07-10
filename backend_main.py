@@ -5,12 +5,10 @@ from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 
-from pathlib import Path
-import os
 import crud
 
 # GENERAL TODO
-# 1 - Finish Prototype Crud Implementation
+# 1 - [~] Finish Prototype Crud Implementation
 # 2 - Implement Encryption / Decryption of Files
 
 # Global Variables
@@ -54,12 +52,12 @@ def LoginScreen():
 
 def MainScreen(username, password):
     # Load Required Information
-    # TODO crud.read(displayAll) adjustments
     while (True):
         print("\n\nWelcome {}!".format(username))
         print("1 - View Entries")
         print("2 - View User Settings")
         print("3 - Add Entry")
+        #TODO Place logout option here instead
         choice = int(input("> "))
         match choice:
             case 1:
@@ -74,14 +72,14 @@ def MainScreen(username, password):
                     print(crud.read(2, username,password))
                     print("Select Entry: ")
                     choice = int(input("> "))
-                    if (choice != 0):
-                        openEntry(username, password, choice-1)
+                    if (choice != 0 and choice <= crud.read(5, username, password)):
+                        openEntry(username, password, choice)
                     else:
                         continue
             case 2:
                 option = UserSettingScreen(username, password)
                 if (option == 1):
-                    return #Logout
+                    return
                 elif (option == 2):
                     continue
             case 3:
@@ -141,7 +139,7 @@ def EditViewScreen(username, password, informationSet, setIndex):
 # systems
 def openEntry(username, password, setIndex):
     informationSet = crud.read(3, username, password, setIndex).split(",")
-    print("Entry Name: {}\n Entry Type : {}\n Entry Description: {}\n Entry Content: {}\n\n".format(
+    print("Entry Name: {}\nEntry Type : {}\nEntry Description: {}\nEntry Content: {}\n\n".format(
         informationSet[0],informationSet[1],informationSet[2],informationSet[3]
     ))
     while (True):
@@ -151,14 +149,14 @@ def openEntry(username, password, setIndex):
                 EditViewScreen(username, password, informationSet, setIndex)
                 return
             case 2:
-                crud.delete(2, username, password, setIndex)
+                crud.delete(2, username, password, setIndex-1)
+                return
             case 3:
                 return
             case _:
                 print("Invalid Input")
 
 def main(mode : int = 1):
-    # TODO User Navigation
     # Load Starting Menu
     if (mode == 1):
         LoginScreen()

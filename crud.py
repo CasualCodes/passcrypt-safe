@@ -127,7 +127,25 @@ def read(readFunc : int, username : str = "default", password : str = "default",
             
             readFile.close()
             return False
+        case 5 : # (Int) Entry Count # NOT NEEDED FOR ACTUAL APP- ONLY FOR EXCEPTION HANDLING
+            readFile = open("data/userentries/{}.csv".format(username), 'r')
+            informationSet = readFile.read().split(",")
 
+            x = 1
+            y = 0
+            while (x < len(informationSet)):
+                if (x % passwordIndex == 0):
+                    pass
+                else:
+                    if ((x+1) % passwordIndex == 0):
+                        y += 1
+                    else:
+                        pass
+                x += 1
+
+            readFile.close()
+            return y
+        
 # UPDATE - Updates the Data Dictionaries
 def update(updateFunc : int, username : str, informationToChange :str , newInformation : str, setIndex : int = 1, entryIndex : int = 0):
     # Assuming that the user exists and usernames are unique
