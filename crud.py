@@ -37,6 +37,7 @@ def create(createFunc : int, username : str, password : str, information : str =
                 writeFile = open(usersPath, 'a')
 
             #Uername is assumed to have no duplicates
+            # ENCRYPT
             writeFile.write("{},{},".format(username, password))
             writeFile.close()
 
@@ -51,6 +52,7 @@ def create(createFunc : int, username : str, password : str, information : str =
 
             # Information = "entryName,entryType,entryDescription,entryContent" [Handled By Frontend]
 
+            # ENCRYPT
             writeFile.write("{},".format(information))
             writeFile.close()
 
@@ -62,6 +64,8 @@ def read(readFunc : int, username : str = "default", password : str = "default",
     match readFunc:
         case 1: # (Bool) Check for Match (User Authentication / Signup Validation)
             readFile = open("data/users.csv", 'r')
+
+            # DECRYPT
             users = readFile.read().split(",")
             userCheck = False
 
@@ -80,6 +84,8 @@ def read(readFunc : int, username : str = "default", password : str = "default",
 
         case 2: # (String) All Nonsensitive Data Retrieval (Main Window Display)
             readFile = open("data/userentries/{}.csv".format(username), 'r')
+
+            # DECRYPT
             informationSet = readFile.read().split(",")
             returnInformation = ""
 
@@ -101,6 +107,8 @@ def read(readFunc : int, username : str = "default", password : str = "default",
         
         case 3: # (String) Specific Set Data Retrieval
             readFile = open("data/userentries/{}.csv".format(username), 'r')
+
+            # DECRYPT
             informationSet = readFile.read().split(",")
             returnInformation : str = ""
 
@@ -116,6 +124,8 @@ def read(readFunc : int, username : str = "default", password : str = "default",
 
         case 4: # (Bool) Duplicate username check
             readFile = open("data/users.csv", 'r')
+
+            # DECRYPT
             users = readFile.read().split(",")
             userCheck = False
 
@@ -129,6 +139,8 @@ def read(readFunc : int, username : str = "default", password : str = "default",
             return False
         case 5 : # (Int) Entry Count # NOT NEEDED FOR ACTUAL APP- ONLY FOR EXCEPTION HANDLING
             readFile = open("data/userentries/{}.csv".format(username), 'r')
+
+            # DECRYPT
             informationSet = readFile.read().split(",")
 
             x = 1
@@ -152,6 +164,8 @@ def update(updateFunc : int, username : str, informationToChange :str , newInfor
     match updateFunc:
         case 1: # User Password Update
             readFile = open("data/users.csv", 'r')
+
+            # DECRYPT
             users = readFile.read().split(",")
             userCheck = False
             for user in users:
@@ -174,7 +188,7 @@ def update(updateFunc : int, username : str, informationToChange :str , newInfor
                 if (user==""):
                     continue
                 else:
-                    print(user)
+                    # ENCRYPT
                     readFile.write("{},".format(user))
 
         case 2: # User Entry Update
@@ -208,6 +222,7 @@ def delete(delFunc : int, username, password, delIndex : int = 1):
     match delFunc:
         case 1: # Delete User
             readFile = open("data/users.csv", 'r')
+            # DECRYPT
             users = readFile.read().split(",")
             userCheck = False
             for user in users:
@@ -229,7 +244,9 @@ def delete(delFunc : int, username, password, delIndex : int = 1):
                 if (user==""):
                     continue
                 else:
+                    # ENCRYPT
                     readFile.write("{},".format(user))
+
             # Delete editeduser file 
             if os.path.exists("data/userentries/{}.csv".format(username)):
                 os.remove("data/userentries/{}.csv".format(username))
@@ -244,6 +261,7 @@ def delete(delFunc : int, username, password, delIndex : int = 1):
             """
             
             readFile = open("data/userentries/{}.csv".format(username), 'r')
+            # DECRYPT
             informationSet = readFile.read().split(",")
 
             passwordIndex = 5
@@ -259,4 +277,5 @@ def delete(delFunc : int, username, password, delIndex : int = 1):
             readFile = open("data/userentries/{}.csv".format(username), 'w')
             for information in informationSet:
                 if(information != ""):
+                    # ENCRYPT
                     readFile.write("{},".format(information))

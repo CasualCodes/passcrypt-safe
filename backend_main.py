@@ -1,15 +1,9 @@
 # Imports
-from Crypto.Random import get_random_bytes
-from Crypto.Protocol.KDF import PBKDF2
-
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
-
 import crud
 
 # GENERAL TODO
-# 1 - [~] Finish Prototype Crud Implementation
-# 2 - Implement Encryption / Decryption of Files
+# 1 - [*] Finish Prototype Crud Implementation
+# 2 - [~]Implement Encryption / Decryption of Files
 
 # Global Variables
 
