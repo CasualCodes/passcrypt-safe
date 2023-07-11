@@ -1,0 +1,5 @@
+# GENERAL TODO
+# 1     -   [*] Finish Prototype Crud Implementation
+# 2     -   [*] Implement Encryption / Decryption of Files
+# 2.5   -   [] Optional Bug Fixing (Much More Necessary AFTER UI Development)
+# 3     -   [] System Replanning (Preparation for UI Development)

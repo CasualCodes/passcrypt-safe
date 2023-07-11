@@ -8,34 +8,40 @@ from Crypto.Util.Padding import pad, unpad
 # TODO: Convert to class
 
 # Variables
-salt : str  # -> generate_random_bytes(32)
-key : bytes # -> PBKDF2(password, salt, dkLen=32)
-message : bytes # -> b""
+salt : bytes = b'D\xe8\x81\xc1|;#2\x87\xadj\xbc\x1c,\xef\xa6\x11\x10}c\x1e\xfa\r\x06\xbem\x15\xe5^\xb7\xfc*'
+defaultKey : bytes = b'W\xdf\x11\xac]\x16\\\x92\xd3>\xc2\x03\xc7\x88\xc54\xd5\x17B\xc3mq\xbc\x03\x96E\x16\x11\x02\x84\xef\x17'
+key : bytes
 
 # Functions
-def generateKey(salt, password):
-    # key = PBKDF2(password, salt, dkLen=32)
-    pass
+def getKey(password, salt=salt):
+    key = PBKDF2(password, salt, dkLen=32)
+    return key
 
 def generateSalt():
     # salt = generate_random_bytes(32)
-    pass
+    return
 
-def loadKey(password):
-    pass
+def encrypt(key, mode, filePath, message):
+    if (mode == False):
+        key = defaultKey
 
-def encrypt(message, key):
-    # wb
-    # cipher = AES.new(key, AES.MODE_CBC)
-    # ciphered_data = cipher.encrypt(pad(message, AES.block_size))
-    # f.write(cipher.iv)
-    # f.write(ciphered_data)
-    pass
+    message = bytes(message, 'utf-8')
+    cipher = AES.new(key, AES.MODE_CBC)
+    encryptData = cipher.encrypt(pad(message, AES.block_size))
 
-def decrypt(message, key):
-    # rb
-    # iv = f.read(16)
-    # decrypt_data = f.read() 
-    # cipher = AES.new(key, AES.MODE_CBC, iv=iv)
-    # original = unpad(cipher.decrypt(decrypt_data), AES.block_size)
-    pass
+    with open(filePath, 'wb') as file:
+        file.write(cipher.iv)
+        file.write(encryptData)
+
+def decrypt(key, mode, filePath):
+    if (mode == False):
+        key = defaultKey
+
+    with open(filePath, 'rb') as file:
+        iv = file.read(16)
+        decryptData = file.read()
+    
+    cipher = AES.new(key, AES.MODE_CBC, iv=iv)
+    original = unpad(cipher.decrypt(decryptData), AES.block_size)
+    original = str(original, 'UTF-8')
+    return original

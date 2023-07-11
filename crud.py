@@ -1,11 +1,12 @@
 from pathlib import Path
 import os
+import encryption
 
 # file-crud-revamp branch
 
 # Path Definitions
-usersPath = "data/users.csv"
-userEntriesPath = "data/userentries/{}.csv"
+usersPath = "data/users.bin"
+userEntriesPath = "data/userentries/{}.bin"
 passwordIndex = 4
 
 # Global variables
@@ -16,6 +17,9 @@ userEntryCount : int = 5 # Placeholder
 users : dict = [dict(userName = "", password = "") for x in range(userCount)]
 userEntries : dict = [dict(entryName = "", entryType = "", entryDescription = "", entryContent = "") for x in range(userEntryCount)]
 
+userMode = False
+userEntriesMode = True
+
 # Functions
 def fileExists(mode, username : str = "default"):
     if (mode == 1):
@@ -25,6 +29,7 @@ def fileExists(mode, username : str = "default"):
 
 # *CREATE - Establishes File Structure
 def create(createFunc : int, username : str, password : str, information : str = "information"):
+    key = encryption.getKey(password)
 
     match createFunc:
         case 1: # Create User Account
@@ -32,41 +37,42 @@ def create(createFunc : int, username : str, password : str, information : str =
             usersFile = fileExists(1)
 
             if not usersFile:
-                writeFile = open(usersPath, 'w')
+                # ENCRYPT
+                toEncrypt = "{},{},".format(username, password)
+                encryption.encrypt(key, userMode, usersPath, toEncrypt)
             else:
-                writeFile = open(usersPath, 'a')
-
-            #Uername is assumed to have no duplicates
-            # ENCRYPT
-            writeFile.write("{},{},".format(username, password))
-            writeFile.close()
+                # READ and ENCRYPT [FOR APPENDING]
+                toEncrypt : str = encryption.decrypt(key, userMode, usersPath)
+                toEncrypt += "{},{},".format(username, password)
+                encryption.encrypt(key, userMode, usersPath, toEncrypt)
 
         case 2: # Create User Entry
             # Check if File Exists
             entryFile = fileExists(2, username)
+            # information = "entryName,entryType,entryDescription,entryContent" [Handled By Frontend]
 
             if not entryFile:
-                writeFile = open(userEntriesPath.format(username), 'w')
+                # ENCRYPT
+                toEncrypt = "{}".format(information)
+                encryption.encrypt(key, userEntriesMode, userEntriesPath.format(username), toEncrypt)
             else:
-                writeFile = open(userEntriesPath.format(username), 'a')
-
-            # Information = "entryName,entryType,entryDescription,entryContent" [Handled By Frontend]
-
-            # ENCRYPT
-            writeFile.write("{},".format(information))
-            writeFile.close()
+                # READ and ENCRYPT [FOR APPENDING]
+                toEncrypt = encryption.decrypt(key, userMode, userEntriesPath.format(username))
+                toEncrypt += "{}".format(information)
+                encryption.encrypt(key, userEntriesMode, userEntriesPath.format(username), toEncrypt)            
 
 # READ - Manages Data Dictionaries for Data Retrieval
 def read(readFunc : int, username : str = "default", password : str = "default", setIndex : int = 1):
-    if (not fileExists(1) or not fileExists(2, username)):
-        return False
+    key = encryption.getKey(password)
 
     match readFunc:
         case 1: # (Bool) Check for Match (User Authentication / Signup Validation)
-            readFile = open("data/users.csv", 'r')
+            if (not fileExists(1)):
+                return False
 
             # DECRYPT
-            users = readFile.read().split(",")
+            decryptFile = encryption.decrypt(key, userMode, usersPath)
+            users = decryptFile.split(",")
             userCheck = False
 
             for user in users:
@@ -78,15 +84,16 @@ def read(readFunc : int, username : str = "default", password : str = "default",
                     return True # Account Found
                 else:
                     userCheck = False
-            
-            readFile.close()
+
             return False # Account Not Found
 
         case 2: # (String) All Nonsensitive Data Retrieval (Main Window Display)
-            readFile = open("data/userentries/{}.csv".format(username), 'r')
+            if (not fileExists(2, username)):
+                return False
 
             # DECRYPT
-            informationSet = readFile.read().split(",")
+            decryptFile = encryption.decrypt(key, userEntriesMode, userEntriesPath.format(username))
+            informationSet = decryptFile.split(",")
             returnInformation = ""
 
             x = 1
@@ -102,14 +109,15 @@ def read(readFunc : int, username : str = "default", password : str = "default",
                         returnInformation += "{} - {} ".format(y+1, informationSet[x-1])
                 x += 1
 
-            readFile.close()
             return returnInformation
         
         case 3: # (String) Specific Set Data Retrieval
-            readFile = open("data/userentries/{}.csv".format(username), 'r')
+            if (not fileExists(2, username)):
+                return False
 
             # DECRYPT
-            informationSet = readFile.read().split(",")
+            decryptFile = encryption.decrypt(key, userEntriesMode, userEntriesPath.format(username))
+            informationSet = decryptFile.split(",")
             returnInformation : str = ""
 
             startingIndex = (setIndex-1) * passwordIndex
@@ -119,14 +127,16 @@ def read(readFunc : int, username : str = "default", password : str = "default",
             while (x < endIndex):
                 returnInformation = returnInformation + informationSet[x] + ","
                 x += 1
-            readFile.close()
+
             return returnInformation
 
         case 4: # (Bool) Duplicate username check
-            readFile = open("data/users.csv", 'r')
-
+            if (not fileExists(1)):
+                return False
+            
             # DECRYPT
-            users = readFile.read().split(",")
+            decryptFile = encryption.decrypt(key, userMode, usersPath)
+            users = decryptFile.split(",")
             userCheck = False
 
             for user in users:
@@ -134,14 +144,15 @@ def read(readFunc : int, username : str = "default", password : str = "default",
                 if (username == user):
                     userCheck = True
                     return True
-            
-            readFile.close()
+
             return False
         case 5 : # (Int) Entry Count # NOT NEEDED FOR ACTUAL APP- ONLY FOR EXCEPTION HANDLING
-            readFile = open("data/userentries/{}.csv".format(username), 'r')
+            if (not fileExists(2, username)):
+                return False
 
             # DECRYPT
-            informationSet = readFile.read().split(",")
+            decryptFile = encryption.decrypt(key, userEntriesMode, userEntriesPath.format(username))
+            informationSet = decryptFile.split(",")
 
             x = 1
             y = 0
@@ -155,18 +166,19 @@ def read(readFunc : int, username : str = "default", password : str = "default",
                         pass
                 x += 1
 
-            readFile.close()
             return y
         
 # UPDATE - Updates the Data Dictionaries
-def update(updateFunc : int, username : str, informationToChange :str , newInformation : str, setIndex : int = 1, entryIndex : int = 0):
+def update(updateFunc : int, username : str, password : str, informationToChange :str , newInformation : str, setIndex : int = 1, entryIndex : int = 0):
+    key = encryption.getKey(password)
+
     # Assuming that the user exists and usernames are unique
     match updateFunc:
         case 1: # User Password Update
-            readFile = open("data/users.csv", 'r')
 
             # DECRYPT
-            users = readFile.read().split(",")
+            decryptFile = encryption.decrypt(key, userMode, usersPath)
+            users = decryptFile.split(",")
             userCheck = False
             for user in users:
                 # check username and password
@@ -180,27 +192,22 @@ def update(updateFunc : int, username : str, informationToChange :str , newInfor
                     print("Password Changed")
                 else:
                     userCheck = False
-            readFile.close()
             
             # Ovewrite with new data
-            readFile = open("data/users.csv", "w")
+            # ENCRYPT
+            toEncrypt : str = ""
             for user in users:
                 if (user==""):
                     continue
                 else:
                     # ENCRYPT
-                    readFile.write("{},".format(user))
+                    toEncrypt += "{},".format(user)
+            encryption.encrypt(key, userMode, usersPath, toEncrypt)
 
         case 2: # User Entry Update
-            """
-            Entry Details:
-            1 - Name of Entry
-            2 - Type of Entry
-            3 - Content of Entry
-            4 - Sensitive Information
-            """
-            readFile = open("data/userentries/{}.csv".format(username), 'r')
-            informationSet = readFile.read().split(",")
+
+            decryptFile = encryption.decrypt(key, userEntriesMode, userEntriesPath.format(username))
+            informationSet = decryptFile.split(",")
 
             startingIndex = (setIndex-1) * passwordIndex
             editIndex = startingIndex + entryIndex
@@ -211,19 +218,23 @@ def update(updateFunc : int, username : str, informationToChange :str , newInfor
                 return
             informationSet[editIndex] = newInformation
 
-            readFile.close()
-            readFile = open("data/userentries/{}.csv".format(username), 'w')
+            toEncrypt : str = ""
             for information in informationSet:
                 if(information != ""):
-                    readFile.write("{},".format(information))
+                    toEncrypt += "{},".format(information)
+            encryption.encrypt(key, userEntriesMode, userEntriesPath.format(username), toEncrypt)
 
 # *DELETE
 def delete(delFunc : int, username, password, delIndex : int = 1):
+    key = encryption.getKey(password)
+    if (delIndex == 0):
+        delIndex = 1
+
     match delFunc:
         case 1: # Delete User
-            readFile = open("data/users.csv", 'r')
             # DECRYPT
-            users = readFile.read().split(",")
+            decryptFile = encryption.decrypt(key, userMode, usersPath)
+            users = decryptFile.split(",")
             userCheck = False
             for user in users:
                 # check username and password
@@ -239,32 +250,31 @@ def delete(delFunc : int, username, password, delIndex : int = 1):
                 else:
                     userCheck = False
             
-            readFile = open("data/users.csv", "w")
+            # ENCRYPT
+            toEncrypt : str = ""
             for user in users:
                 if (user==""):
                     continue
                 else:
-                    # ENCRYPT
-                    readFile.write("{},".format(user))
+                    toEncrypt += "{},".format(user)
+            
+            # If no users remain, delete user file
+            if (toEncrypt == ""):
+                if os.path.exists(usersPath):
+                    os.remove(usersPath)
+            else:
+                encryption.encrypt(key, userMode, usersPath, toEncrypt)
 
             # Delete editeduser file 
-            if os.path.exists("data/userentries/{}.csv".format(username)):
-                os.remove("data/userentries/{}.csv".format(username))
+            if os.path.exists(userEntriesPath.format(username)):
+                os.remove(userEntriesPath.format(username))
 
         case 2: # Delete User Entry
-            """
-            Entry Details:
-            1 - Name of Entry
-            2 - Type of Entry
-            3 - Content of Entry
-            4 - Sensitive Information
-            """
             
-            readFile = open("data/userentries/{}.csv".format(username), 'r')
             # DECRYPT
-            informationSet = readFile.read().split(",")
+            decryptFile = encryption.decrypt(key, userEntriesMode, userEntriesPath.format(username))
+            informationSet = decryptFile.split(",")
 
-            passwordIndex = 5
             startingIndex = (delIndex-1) * passwordIndex
             endIndex = delIndex * passwordIndex
 
@@ -272,10 +282,15 @@ def delete(delFunc : int, username, password, delIndex : int = 1):
             while (x < endIndex):
                 informationSet[x] = ""
                 x += 1
-
-            readFile.close()
-            readFile = open("data/userentries/{}.csv".format(username), 'w')
+            
+            toEncrypt : str = ""
             for information in informationSet:
                 if(information != ""):
-                    # ENCRYPT
-                    readFile.write("{},".format(information))
+                    toEncrypt += "{},".format(information)
+
+            # If no entries remain, delete entry file
+            if (toEncrypt == ""):
+                if os.path.exists(userEntriesPath.format(username)):
+                    os.remove(userEntriesPath.format(username))
+            else:
+                encryption.encrypt(key, userEntriesMode, userEntriesPath.format(username), toEncrypt)

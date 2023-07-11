@@ -1,12 +1,6 @@
 # Imports
 import crud
 
-# GENERAL TODO
-# 1 - [*] Finish Prototype Crud Implementation
-# 2 - [~]Implement Encryption / Decryption of Files
-
-# Global Variables
-
 # Screens
 def LoginScreen():
     print("Welcome to Passcrypt Safe!")
@@ -102,7 +96,7 @@ def UserSettingScreen(username, password):
                 if oldPassword != password:
                     print("Invalid!")
                 else:
-                    crud.update(1, username, password, newPassword)
+                    crud.update(1, username, password, password, newPassword)
                     print("Successfully Edited Password")
                 continue
             case 2:
@@ -126,7 +120,7 @@ def EditViewScreen(username, password, informationSet, setIndex):
     choice = int(input("Which to edit?:\n1 - Entry Name\n2 - Entry Type\n3 - Entry Description\n4 - Entry Content\n> "))
     if (choice == 1 or choice == 2 or choice == 3 or choice == 4):
         newInformation = input("Enter New Information: ")
-        crud.update(2, username, informationSet[choice-1], newInformation, setIndex)
+        crud.update(2, username, password, informationSet[choice-1], newInformation, setIndex)
     else:
         print("Invalid Input - Returning to Entry View")
 
@@ -155,23 +149,6 @@ def main(mode : int = 1):
     if (mode == 1):
         LoginScreen()
     else:
-        print("CRUD Testing Mode:")
-        #crud.create(1, "username", "password")
-        #crud.create(1, "newUser", "newPassword")
-        #crud.create(2, "newUser", "newPassword", "Gmail,Account,Gmail@gmail.com,Account For Gmail,password12345678,1,2,3,4,5")
-        #crud.create(1, "editedUser", "noneditedPassword")
-        #crud.create(2, "editedUser", "noneditedPassword", "1,1,1,1,1")
-        #crud.create(2, "username", "password", "1,2,3,4,5")
-        #crud.read(1, "newUser", "newPassword")
-        #crud.read(2, "newUser", "newPassword")
-        #crud.read(3, "newUser", "newPassword")
-        #crud.read(3, "newUser", "newPassword", 2)
-        #crud.read(1, "editedUser", "noneditedPassword")
-        #crud.update(1, "editedUser", "noneditedPassword", "editedPassword")
-        #crud.read(1, "editedUser", "editedPassword")
-        #crud.update(2, "username", "5", "newpassword", 1, 4)
-        #crud.delete(1, "editedUser", "editedPassword")
-        #crud.delete(2, "newUser", "newPassword", 2)
+        return
 
 main()
-#main(2)
