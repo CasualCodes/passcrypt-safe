@@ -1,5 +1,10 @@
 # GENERAL TODO
 # 1     -   [*] Finish Prototype Crud Implementation
 # 2     -   [*] Implement Encryption / Decryption of Files
-# 2.5   -   [] Optional Bug Fixing (Much More Necessary AFTER UI Development)
-# 3     -   [] System Replanning (Preparation for UI Development)
+# 2.5   -   [#] Optional Bug Fixing (Much More Necessary AFTER UI Development)
+            Bugs/Features found/realized during prototyping:
+                - Changing password requires decrypting all entries and re-encrypting them with new password
+
+# 3     -   [~] App Prototyping (Preparation for UI Development)
+            Used Pallet: https://www.color-hex.com/color-palette/1294
+            Used App: Lunacy
