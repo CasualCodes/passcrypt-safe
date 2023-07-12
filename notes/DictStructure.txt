@@ -1,3 +1,5 @@
+ATTEMPT
+
 dictStructure
     users = {"username" : "___", "password" : "___"}
     userEntry = {"entryname" : "___", "entrytype" : "___", "entrydescription" : "___", "entryContent" : "___"}
