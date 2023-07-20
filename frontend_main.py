@@ -8,6 +8,10 @@ from PyQt5.QtWidgets import QApplication
 # Functions / Methods
 # Using loadUI due to mainly using QtDesigner for layout editing
 
+# Progress
+# [*] Navigation
+# [] Backend Integration
+
 class LoginScreen(QtWidgets.QMainWindow):
     def __init__(self):
         super(LoginScreen, self).__init__()
@@ -55,6 +59,7 @@ class MainScreen(QtWidgets.QMainWindow):
         # Table Section
         self.filterCombo = self.findChild(QtWidgets.QComboBox, "filterCombo")
         self.tableWidget = self.findChild(QtWidgets.QTableWidget, "tableWidget")
+        self.loadTable() # TODO ! Disable Table Editing and Other Table Features (except selecting a row,column)
 
         # Sidebar Stacked Widget
         self.sidebar = self.findChild(QtWidgets.QStackedWidget, "sidebar")
@@ -116,10 +121,17 @@ class MainScreen(QtWidgets.QMainWindow):
 
         # Table
         # -> Insert Default View Button Here <-.clicked.connect(self.loadDefault)
+        self.cancelButton_3.clicked.connect(self.loadDefault)
+
         # -> Insert Table Button Connection Here <-.clicked.connect(self.loadSelectedEntryView)
+        self.tableWidget.cellClicked.connect(self.loadSelectedEntryView)
 
         # Sidebar
-        # Delete View
+        # Selected Entry View
+        self.deleteButton.clicked.connect(self.deleteEntry)
+        self.editButton.clicked.connect(self.editEntry)
+
+        # Delete Account View
         self.deleteAccountButton.clicked.connect(self.loadAccountDeleteView)
         self.cancelButton_2.clicked.connect(self.loadSettingsView)
 
@@ -131,12 +143,52 @@ class MainScreen(QtWidgets.QMainWindow):
     def logout(self):
         widget.setCurrentIndex(widget.currentIndex()-1)
         # TODO clear parameters
+    
+    # TODO ! Modify setting up data from crud | Modify crud | Get Crud Logic
+    def loadTable(self):
+        # Default Values (for testing purposes)
+        input="Name,Type,Description,Password,Name2,Type2,Description2,Password2"
+        entries = input.split(",")
+        rowCount = int(len(entries)/4)
+        row = 0
+        self.tableWidget.setRowCount(rowCount)
+        index = 0
+        for row in range(rowCount):
+            self.tableWidget.setItem(row, 0, QtWidgets.QTableWidgetItem(str(entries[index])))
+            index += 1
+            self.tableWidget.setItem(row, 1, QtWidgets.QTableWidgetItem(str(entries[index])))
+            index += 1
+            self.tableWidget.setItem(row, 2, QtWidgets.QTableWidgetItem(str(entries[index])))
+            index += 2
+            row += 1
 
     def loadDefault(self):
         self.sidebar.setCurrentWidget(self.sidebar.defaultView)
     
-    def loadSelectedEntryView(self):
+    def loadSelectedEntryView(self, row, column):
+        # TODO ! Make Entry Content (contents) 'hidden' somehow
+        input="Name,Type,Description,Password,Name2,Type2,Description2,Password2"
+        entries = input.split(",")
+        # Based on crud logic
+        startIndex = (row+1)*4 - 4
+
+        self.sidebar.selectedEntryView.entryNameEdit.setText(entries[startIndex])
+        startIndex +=1
+        self.sidebar.selectedEntryView.entryTypeEdit.setText(entries[startIndex])
+        startIndex +=1
+        self.sidebar.selectedEntryView.entryDescriptionEdit.setText(entries[startIndex])
+        startIndex +=1
+        self.sidebar.selectedEntryView.entryContentEdit.setText(entries[startIndex])
+
         self.sidebar.setCurrentWidget(self.sidebar.selectedEntryView)
+
+    def deleteEntry(self, row):
+        # Delete from table
+        pass
+
+    def editEntry(self, row):
+        # Enable all line edits
+        pass
 
     def loadSettingsView(self):
         self.sidebar.setCurrentWidget(self.sidebar.userSettingView)
