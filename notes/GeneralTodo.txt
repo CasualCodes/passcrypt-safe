@@ -5,6 +5,16 @@
             Bugs/Features found/realized during prototyping:
                 - Changing password requires decrypting all entries and re-encrypting them with new password
 
-# 3     -   [~] App Prototyping (Preparation for UI Development)
+# 3     -   [*] App Prototyping (Preparation for UI Development)
             Used Pallet: https://www.color-hex.com/color-palette/1294
             Used App: Lunacy
+# 4     -   [*] Frontend Implementation
+            - Navigation at least -> Remaining Frontend Implementation is alongisde Backend Integration
+# 5     -   [] Backend Integration
+                <> I/O Review
+                <> CRUD Review
+                <> Frontend Modifications for Crud
+                <> Crud Modifications for Frontend
+                <> Integration Proper
+                <> Testing
+                <> Finish Remaining Frontend Tasks (Polishing)
