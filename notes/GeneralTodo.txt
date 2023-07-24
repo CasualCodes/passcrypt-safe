@@ -11,10 +11,18 @@
 # 4     -   [*] Frontend Implementation
             - Navigation at least -> Remaining Frontend Implementation is alongisde Backend Integration
 # 5     -   [] Backend Integration
-                <> I/O Review
-                <> CRUD Review
+                <> I/O and CRUD Review
                 <> Frontend Modifications for Crud
                 <> Crud Modifications for Frontend
                 <> Integration Proper
                 <> Testing
                 <> Finish Remaining Frontend Tasks (Polishing)
+
+# 5.1   -   <> I/O and CRUD Review
+                + After Integration, add a 'choose your data folder' functionality
+                - CRUD Matters:
+                    + Create Function will work theoretically for Login Screen
+                    - Given that there are no changes to file handling (which i doubt), 
+                        case 2 may not suffice anymore. We'll see
+                    - Reminder: all user entry contents are currently stored in ONE encrypted file
+            

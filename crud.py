@@ -96,6 +96,7 @@ def read(readFunc : int, username : str = "default", password : str = "default",
             informationSet = decryptFile.split(",")
             returnInformation = ""
 
+            # TODO ! Modify returnInformation Format
             x = 1
             y = 0
             while (x < len(informationSet)):

@@ -1,5 +1,6 @@
 # Imports - to be polished
 import sys
+import crud
 import PyQt5
 from PyQt5 import uic
 from PyQt5 import QtWidgets
@@ -11,6 +12,24 @@ from PyQt5.QtWidgets import QApplication
 # Progress
 # [*] Navigation
 # [] Backend Integration
+
+# backend reference 
+"""
+def LoginScreen():
+        passwordIncorrect = False
+        accountAlreadyExists = False
+
+            case 2:
+                signUpUsername = input("[Signup] Enter Username: ")
+                signUpPassword = input("[Signup] Enter Password: ")
+                # Signup Verification
+                accountAlreadyExists = crud.read(4, signUpUsername, signUpPassword)
+                if accountAlreadyExists:
+                    print("Invalid Signup!\n\n")
+                else:
+                    crud.create(1, signUpUsername, signUpPassword)
+                    print("Account Successfully Created!\n\n")
+"""
 
 class LoginScreen(QtWidgets.QMainWindow):
     def __init__(self):
@@ -30,12 +49,43 @@ class LoginScreen(QtWidgets.QMainWindow):
 
     # Functions
     def login(self):
-        # LOAD MAIN
-        widget.setCurrentIndex(widget.currentIndex()+1)
-        # TODO add parameters to load
+        # Login Authentication/Verification
+        
+        if (self.getUsername() == "" or self.getPassword() == ""):
+            self.usernameEdit.setText("")
+            self.passwordEdit.setText("")
+            self.welcomeLabel.setText("Empty Input, Try Again")
+            return
+
+        passwordIncorrect = not crud.read(1, self.getUsername(), self.getPassword())
+        if passwordIncorrect:
+            self.usernameEdit.setText("")
+            self.passwordEdit.setText("")
+            self.welcomeLabel.setText("Incorrect Password, Try Again")
+        else:
+            mainScreen = MainScreen(self.getUsername(), self.getPassword())
+            self.usernameEdit.setText("")
+            self.passwordEdit.setText("")
+            widget.removeWidget(main)
+            widget.addWidget(mainScreen)
+            widget.setCurrentIndex(widget.currentIndex()+1)
 
     def signup(self):
-        print("{} {}".format(self.getUsername(), self.getPassword()))
+        if (self.getUsername() == "" or self.getPassword() == ""):
+            self.usernameEdit.setText("")
+            self.passwordEdit.setText("")
+            self.welcomeLabel.setText("Empty Input, Try Again")
+            return
+        
+        # Signup Verification
+        accountAlreadyExists = crud.read(4, self.getUsername(), self.getPassword())
+        if accountAlreadyExists:
+            self.usernameEdit.setText("")
+            self.passwordEdit.setText("")
+            self.welcomeLabel.setText("Account already exists, Try Again")
+        else:
+            crud.create(1, self.getUsername(), self.getPassword())
+            self.welcomeLabel.setText("Account Successfully Created!")
 
     def getUsername(self):
         return self.usernameEdit.text()
@@ -45,13 +95,16 @@ class LoginScreen(QtWidgets.QMainWindow):
 
 
 class MainScreen(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, username : str = "default", password : str = "default"): # Attempt for arguments in Main Screen
         super(MainScreen, self).__init__()
         uic.loadUi("ui/MainScreen.ui", self)
+        self.username = username
+        self.password = password
 
         # References    
         # Topbar Elements
         self.welcomeLabel = self.findChild(QtWidgets.QLabel, "welcomeLabel")
+        self.welcomeLabel.setText("Welcome! {}".format(self.username))
         self.addEntryButton = self.findChild(QtWidgets.QPushButton, "addEntryButton")
         self.logoutButton = self.findChild(QtWidgets.QPushButton, "logoutButton")
         self.userSettingsButton = self.findChild(QtWidgets.QPushButton, "userSettingsButton")
@@ -141,15 +194,16 @@ class MainScreen(QtWidgets.QMainWindow):
     
     # Functions
     def logout(self):
+        widget.removeWidget(self)
         widget.setCurrentIndex(widget.currentIndex()-1)
-        # TODO clear parameters
     
     # TODO ! Modify setting up data from crud | Modify crud | Get Crud Logic
     def loadTable(self):
         # Default Values (for testing purposes)
-        input="Name,Type,Description,Password,Name2,Type2,Description2,Password2"
+        # input = read(2, self.username, self.password)
+        input="Name,Type,Description"
         entries = input.split(",")
-        rowCount = int(len(entries)/4)
+        rowCount = int(len(entries)/3)
         row = 0
         self.tableWidget.setRowCount(rowCount)
         index = 0
@@ -159,36 +213,41 @@ class MainScreen(QtWidgets.QMainWindow):
             self.tableWidget.setItem(row, 1, QtWidgets.QTableWidgetItem(str(entries[index])))
             index += 1
             self.tableWidget.setItem(row, 2, QtWidgets.QTableWidgetItem(str(entries[index])))
-            index += 2
+            index += 1
             row += 1
 
     def loadDefault(self):
         self.sidebar.setCurrentWidget(self.sidebar.defaultView)
     
-    def loadSelectedEntryView(self, row, column):
+    def loadSelectedEntryView(self, row):
         # TODO ! Make Entry Content (contents) 'hidden' somehow
-        input="Name,Type,Description,Password,Name2,Type2,Description2,Password2"
-        entries = input.split(",")
+        # input = crud.read(3, self.username, self.password, row)
+        input="Name,Type,Description,Password"
+        entry = input.split(",")
         # Based on crud logic
-        startIndex = (row+1)*4 - 4
-
-        self.sidebar.selectedEntryView.entryNameEdit.setText(entries[startIndex])
-        startIndex +=1
-        self.sidebar.selectedEntryView.entryTypeEdit.setText(entries[startIndex])
-        startIndex +=1
-        self.sidebar.selectedEntryView.entryDescriptionEdit.setText(entries[startIndex])
-        startIndex +=1
-        self.sidebar.selectedEntryView.entryContentEdit.setText(entries[startIndex])
-
+        entryName = 0
+        entryType = 1
+        entryDescription = 2
+        entryContent = 3
+        
+        self.sidebar.selectedEntryView.entryNameEdit.setText(entry[entryName])
+        self.sidebar.selectedEntryView.entryTypeEdit.setText(entry[entryType])
+        self.sidebar.selectedEntryView.entryDescriptionEdit.setText(entry[entryDescription])
+        self.sidebar.selectedEntryView.entryContentEdit.setText(entry[entryContent])
         self.sidebar.setCurrentWidget(self.sidebar.selectedEntryView)
 
     def deleteEntry(self, row):
         # Delete from table
+
+        # Delete from file
         pass
 
     def editEntry(self, row):
         # Enable all line edits
+
+        # Edit file
         pass
+
 
     def loadSettingsView(self):
         self.sidebar.setCurrentWidget(self.sidebar.userSettingView)
@@ -198,17 +257,27 @@ class MainScreen(QtWidgets.QMainWindow):
 
     def loadPasswordChangeView(self):
         self.sidebar.setCurrentWidget(self.sidebar.passwordChangeView)
+    
+    def deleteAccount(self):
+        pass
+
+    def changePassword(self):
+        pass
 
     def loadNewEntryView(self):
         self.sidebar.setCurrentWidget(self.sidebar.newEntryView)
+    
+    def addNewEntry(self):
+        pass
 
 
 app = QApplication(sys.argv)
 widget = QtWidgets.QStackedWidget()
 loginScreen = LoginScreen()
-mainScreen = MainScreen()
+# TODO ! just set size constraints
+main = MainScreen()
 widget.addWidget(loginScreen)
-widget.addWidget(mainScreen)
+widget.addWidget(main)
 widget.setCurrentIndex(0)
 widget.show()
 sys.exit(app.exec())
