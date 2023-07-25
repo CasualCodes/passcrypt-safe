@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QApplication
 # Progress
 # [*] Navigation
 # [*] Backend Integration
-# [] Flaw Analysis
+# [] Flaw Review
 
 class LoginScreen(QtWidgets.QMainWindow):
     def __init__(self):
