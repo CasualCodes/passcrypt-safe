@@ -5,6 +5,8 @@ import encryption
 # file-crud-revamp branch
 
 # Path Definitions
+dataPath = "data"
+userentriesPath = "data/userentries"
 usersPath = "data/users.bin"
 userEntriesPath = "data/userentries/{}.bin"
 passwordIndex = 4
@@ -23,8 +25,12 @@ userEntriesMode = True
 # Functions
 def fileExists(mode, username : str = "default"):
     if (mode == 1):
+        if not os.path.exists(dataPath):
+            os.mkdir(dataPath)
         return os.path.exists(usersPath)
     else:
+        if not os.path.exists(userentriesPath):
+            os.mkdir(userentriesPath)
         return os.path.exists(userEntriesPath.format(username))
 
 # *CREATE - Establishes File Structure
@@ -57,7 +63,7 @@ def create(createFunc : int, username : str, password : str, information : str =
                 encryption.encrypt(key, userEntriesMode, userEntriesPath.format(username), toEncrypt)
             else:
                 # READ and ENCRYPT [FOR APPENDING]
-                toEncrypt = encryption.decrypt(key, userMode, userEntriesPath.format(username))
+                toEncrypt = encryption.decrypt(key, userEntriesMode, userEntriesPath.format(username))
                 toEncrypt += "{}".format(information)
                 encryption.encrypt(key, userEntriesMode, userEntriesPath.format(username), toEncrypt)            
 
@@ -104,10 +110,10 @@ def read(readFunc : int, username : str = "default", password : str = "default",
                     pass
                 else:
                     if ((x+1) % passwordIndex == 0):
-                        returnInformation += "{} - {}\n\n".format(y+1, informationSet[x-1])
+                        returnInformation += "{},".format(informationSet[x-1])
                         y += 1
                     else:
-                        returnInformation += "{} - {} ".format(y+1, informationSet[x-1])
+                        returnInformation += "{},".format(informationSet[x-1])
                 x += 1
 
             return returnInformation
@@ -168,6 +174,16 @@ def read(readFunc : int, username : str = "default", password : str = "default",
                 x += 1
 
             return y
+        case 6 : # Get all information
+            if (not fileExists(2, username)):
+                return False
+
+            # DECRYPT
+            decryptFile = encryption.decrypt(key, userEntriesMode, userEntriesPath.format(username))
+            informationSet = decryptFile.split(",")
+            returnInformation = informationSet
+
+            return returnInformation
         
 # UPDATE - Updates the Data Dictionaries
 def update(updateFunc : int, username : str, password : str, informationToChange :str , newInformation : str, setIndex : int = 1, entryIndex : int = 0):
@@ -213,11 +229,31 @@ def update(updateFunc : int, username : str, password : str, informationToChange
             startingIndex = (setIndex-1) * passwordIndex
             editIndex = startingIndex + entryIndex
 
-            # TODO? Add Password Verification for authenticated password editing
+            # TODO ??? Add Password Verification for authenticated password editing
             if (entryIndex == 4 and informationSet[editIndex] != informationToChange):
                 print("Old Password is Incorrect")
                 return
             informationSet[editIndex] = newInformation
+
+            toEncrypt : str = ""
+            for information in informationSet:
+                if(information != ""):
+                    toEncrypt += "{},".format(information)
+            encryption.encrypt(key, userEntriesMode, userEntriesPath.format(username), toEncrypt)
+
+        case 3: # Update Whole Entry
+            decryptFile = encryption.decrypt(key, userEntriesMode, userEntriesPath.format(username))
+            informationSet = decryptFile.split(",")
+            newInformationSplit = newInformation.split(",")
+
+            startingIndex = (setIndex-1) * passwordIndex
+            editIndex = startingIndex+3
+            index = 0
+
+            while (startingIndex<editIndex):
+                informationSet[startingIndex] = newInformationSplit[index]
+                startingIndex += 1
+                index += 1
 
             toEncrypt : str = ""
             for information in informationSet:
@@ -295,3 +331,8 @@ def delete(delFunc : int, username, password, delIndex : int = 1):
                     os.remove(userEntriesPath.format(username))
             else:
                 encryption.encrypt(key, userEntriesMode, userEntriesPath.format(username), toEncrypt)
+        
+        case 3: # Delete User Entries File
+            # Delete editeduser file 
+            if os.path.exists(userEntriesPath.format(username)):
+                os.remove(userEntriesPath.format(username))

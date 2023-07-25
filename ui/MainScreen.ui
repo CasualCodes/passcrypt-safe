@@ -219,7 +219,7 @@ background-color: rgb(0, 91, 150);</string>
          <property name="currentIndex">
           <number>0</number>
          </property>
-         <widget class="QWidget" name="defaultView" native="true">
+         <widget class="QWidget" name="defaultView">
           <property name="styleSheet">
            <string notr="true">background-color: rgb(3, 57, 108);</string>
           </property>
@@ -267,43 +267,54 @@ background-color: rgb(0, 91, 150);</string>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="entryTypeEdit">
+            <widget class="QComboBox" name="entryTypeCombo_2">
              <property name="enabled">
               <bool>false</bool>
              </property>
              <property name="minimumSize">
               <size>
                <width>0</width>
-               <height>75</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>400</width>
-               <height>16777215</height>
+               <height>0</height>
               </size>
              </property>
              <property name="font">
               <font>
                <family>Montserrat</family>
                <pointsize>18</pointsize>
+               <weight>50</weight>
+               <italic>false</italic>
+               <bold>false</bold>
               </font>
              </property>
-             <property name="styleSheet">
-              <string notr="true">color: rgb(179, 205, 224);</string>
+             <property name="focusPolicy">
+              <enum>Qt::WheelFocus</enum>
              </property>
-             <property name="text">
-              <string/>
+             <property name="autoFillBackground">
+              <bool>false</bool>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color: rgb(179, 205, 224);
+font: 18pt &quot;Montserrat&quot;;</string>
+             </property>
+             <property name="editable">
+              <bool>true</bool>
+             </property>
+             <property name="currentText">
+              <string>Entry Type</string>
              </property>
              <property name="frame">
               <bool>false</bool>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-             </property>
-             <property name="placeholderText">
-              <string>Entry Type</string>
-             </property>
+             <item>
+              <property name="text">
+               <string>Entry Type</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Account</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item>
@@ -408,6 +419,9 @@ background-color: rgb(0, 91, 150);</string>
              </property>
              <property name="frame">
               <bool>false</bool>
+             </property>
+             <property name="echoMode">
+              <enum>QLineEdit::Normal</enum>
              </property>
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -617,7 +631,7 @@ background-color: rgb(0, 91, 150);</string>
            <item>
             <widget class="QLineEdit" name="oldPasswordEdit">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="minimumSize">
               <size>
@@ -657,7 +671,7 @@ background-color: rgb(0, 91, 150);</string>
            <item>
             <widget class="QLineEdit" name="newPasswordEdit">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="minimumSize">
               <size>
@@ -842,7 +856,7 @@ background-color: rgb(0, 91, 150);</string>
            <item>
             <widget class="QLineEdit" name="passwordEdit">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="minimumSize">
               <size>
@@ -996,7 +1010,7 @@ background-color: rgb(0, 91, 150);</string>
            <item>
             <widget class="QLineEdit" name="entryNameEdit_2">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="minimumSize">
               <size>
@@ -1061,7 +1075,7 @@ background-color: rgb(0, 91, 150);</string>
 font: 18pt &quot;Montserrat&quot;;</string>
              </property>
              <property name="editable">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
              <property name="currentText">
               <string>Entry Type</string>
@@ -1084,7 +1098,7 @@ font: 18pt &quot;Montserrat&quot;;</string>
            <item>
             <widget class="QLineEdit" name="entryDescriptionEdit_2">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="minimumSize">
               <size>
@@ -1124,7 +1138,7 @@ font: 18pt &quot;Montserrat&quot;;</string>
            <item>
             <widget class="QLineEdit" name="entryContentEdit_2">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="minimumSize">
               <size>
@@ -1280,6 +1294,9 @@ color: rgb(179, 205, 224);</string>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(1, 31, 75);</string>
             </property>
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
             <property name="tabKeyNavigation">
              <bool>true</bool>
             </property>
@@ -1288,6 +1305,9 @@ color: rgb(179, 205, 224);</string>
             </property>
             <property name="dragDropOverwriteMode">
              <bool>true</bool>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
             </property>
             <property name="showGrid">
              <bool>true</bool>

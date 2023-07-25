@@ -11,25 +11,7 @@ from PyQt5.QtWidgets import QApplication
 
 # Progress
 # [*] Navigation
-# [] Backend Integration
-
-# backend reference 
-"""
-def LoginScreen():
-        passwordIncorrect = False
-        accountAlreadyExists = False
-
-            case 2:
-                signUpUsername = input("[Signup] Enter Username: ")
-                signUpPassword = input("[Signup] Enter Password: ")
-                # Signup Verification
-                accountAlreadyExists = crud.read(4, signUpUsername, signUpPassword)
-                if accountAlreadyExists:
-                    print("Invalid Signup!\n\n")
-                else:
-                    crud.create(1, signUpUsername, signUpPassword)
-                    print("Account Successfully Created!\n\n")
-"""
+# [~] Backend Integration
 
 class LoginScreen(QtWidgets.QMainWindow):
     def __init__(self):
@@ -66,7 +48,6 @@ class LoginScreen(QtWidgets.QMainWindow):
             mainScreen = MainScreen(self.getUsername(), self.getPassword())
             self.usernameEdit.setText("")
             self.passwordEdit.setText("")
-            widget.removeWidget(main)
             widget.addWidget(mainScreen)
             widget.setCurrentIndex(widget.currentIndex()+1)
 
@@ -100,11 +81,12 @@ class MainScreen(QtWidgets.QMainWindow):
         uic.loadUi("ui/MainScreen.ui", self)
         self.username = username
         self.password = password
+        self.tableLoaded = False
 
         # References    
         # Topbar Elements
         self.welcomeLabel = self.findChild(QtWidgets.QLabel, "welcomeLabel")
-        self.welcomeLabel.setText("Welcome! {}".format(self.username))
+        
         self.addEntryButton = self.findChild(QtWidgets.QPushButton, "addEntryButton")
         self.logoutButton = self.findChild(QtWidgets.QPushButton, "logoutButton")
         self.userSettingsButton = self.findChild(QtWidgets.QPushButton, "userSettingsButton")
@@ -112,15 +94,12 @@ class MainScreen(QtWidgets.QMainWindow):
         # Table Section
         self.filterCombo = self.findChild(QtWidgets.QComboBox, "filterCombo")
         self.tableWidget = self.findChild(QtWidgets.QTableWidget, "tableWidget")
-        self.loadTable() # TODO ! Disable Table Editing and Other Table Features (except selecting a row,column)
 
         # Sidebar Stacked Widget
         self.sidebar = self.findChild(QtWidgets.QStackedWidget, "sidebar")
 
         # Default View
         self.sidebar.defaultView = self.findChild(QtWidgets.QWidget, "defaultView")
-
-        # TODO - CHECK IF YOU CAN USE SHORTER NAMES AS REFERENCE
 
         # View Entry
         self.sidebar.selectedEntryView = self.findChild(QtWidgets.QWidget, "selectedEntryView")
@@ -129,7 +108,7 @@ class MainScreen(QtWidgets.QMainWindow):
         self.sidebar.selectedEntryView.entryContentEdit = self.findChild(QtWidgets.QLineEdit, "entryContentEdit")
         self.sidebar.selectedEntryView.entryDescriptionEdit = self.findChild(QtWidgets.QLineEdit, "entryDescriptionEdit")
         self.sidebar.selectedEntryView.entryNameEdit = self.findChild(QtWidgets.QLineEdit, "entryNameEdit")
-        self.sidebar.selectedEntryView.entryTypeEdit = self.findChild(QtWidgets.QLineEdit, "entryTypeEdit")
+        self.sidebar.selectedEntryView.entryTypeCombo_2 = self.findChild(QtWidgets.QComboBox, "entryTypeCombo")
 
         # User Settings
         self.sidebar.userSettingView = self.findChild(QtWidgets.QWidget, "userSettingView")
@@ -166,6 +145,10 @@ class MainScreen(QtWidgets.QMainWindow):
         self.sidebar.newEntryView.entryTypeCombo = self.findChild(QtWidgets.QComboBox , "entryTypeCombo")
         self.sidebar.newEntryView.saveButton = self.findChild(QtWidgets.QPushButton , "saveButton")
 
+        # Initialization
+        self.welcomeLabel.setText("Welcome! {}".format(self.username))
+        self.loadTable()
+
         # Connections
         # Topbar
         self.addEntryButton.clicked.connect(self.loadNewEntryView)
@@ -173,16 +156,10 @@ class MainScreen(QtWidgets.QMainWindow):
         self.logoutButton.clicked.connect(self.logout)
 
         # Table
-        # -> Insert Default View Button Here <-.clicked.connect(self.loadDefault)
-        self.cancelButton_3.clicked.connect(self.loadDefault)
-
-        # -> Insert Table Button Connection Here <-.clicked.connect(self.loadSelectedEntryView)
         self.tableWidget.cellClicked.connect(self.loadSelectedEntryView)
 
         # Sidebar
-        # Selected Entry View
-        self.deleteButton.clicked.connect(self.deleteEntry)
-        self.editButton.clicked.connect(self.editEntry)
+
 
         # Delete Account View
         self.deleteAccountButton.clicked.connect(self.loadAccountDeleteView)
@@ -191,22 +168,32 @@ class MainScreen(QtWidgets.QMainWindow):
         # Change Password View
         self.changePasswordButton.clicked.connect(self.loadPasswordChangeView)
         self.cancelButton.clicked.connect(self.loadSettingsView)
+
+        # Add Entry View
+        self.saveButton.clicked.connect(self.addNewEntry)
+        self.cancelButton_3.clicked.connect(self.loadDefault)
     
-    # Functions
+    # Default Sidebar
+    def loadDefault(self):
+        self.sidebar.setCurrentWidget(self.sidebar.defaultView)
+
+    # Logout
     def logout(self):
         widget.removeWidget(self)
         widget.setCurrentIndex(widget.currentIndex()-1)
     
-    # TODO ! Modify setting up data from crud | Modify crud | Get Crud Logic
+    # Table Display/Loading\
     def loadTable(self):
-        # Default Values (for testing purposes)
-        # input = read(2, self.username, self.password)
-        input="Name,Type,Description"
+        input =  crud.read(2, self.username, self.password)
+        if input == False:
+            return
         entries = input.split(",")
         rowCount = int(len(entries)/3)
         row = 0
         self.tableWidget.setRowCount(rowCount)
         index = 0
+        print(input)
+        print(row, rowCount)
         for row in range(rowCount):
             self.tableWidget.setItem(row, 0, QtWidgets.QTableWidgetItem(str(entries[index])))
             index += 1
@@ -216,39 +203,105 @@ class MainScreen(QtWidgets.QMainWindow):
             index += 1
             row += 1
 
-    def loadDefault(self):
-        self.sidebar.setCurrentWidget(self.sidebar.defaultView)
-    
+    def updateTable(self):
+        #self.tableWidget.clearContents()
+        self.loadTable()
+        self.loadDefault()
+
+    # Selected Entry Sidebar
     def loadSelectedEntryView(self, row):
         # TODO ! Make Entry Content (contents) 'hidden' somehow
-        # input = crud.read(3, self.username, self.password, row)
-        input="Name,Type,Description,Password"
+        input = crud.read(3, self.username, self.password, row)
         entry = input.split(",")
-        # Based on crud logic
+
         entryName = 0
         entryType = 1
         entryDescription = 2
         entryContent = 3
+
+        if entry[entryType] == "Account":
+            entryIndex = 1
+        else:
+            entryIndex = 0
         
         self.sidebar.selectedEntryView.entryNameEdit.setText(entry[entryName])
-        self.sidebar.selectedEntryView.entryTypeEdit.setText(entry[entryType])
+        self.entryTypeCombo_2.setCurrentIndex(entryIndex)
         self.sidebar.selectedEntryView.entryDescriptionEdit.setText(entry[entryDescription])
         self.sidebar.selectedEntryView.entryContentEdit.setText(entry[entryContent])
         self.sidebar.setCurrentWidget(self.sidebar.selectedEntryView)
 
+        # Selected Entry View Buttons
+        # self.deleteButton.clicked.connect(self.deleteEntry(row))
+        self.editButton.clicked.connect(lambda: self.editEntryEnable(row))
+
+    # New Entry Sidebar + add entry function
+    def loadNewEntryView(self):
+        self.sidebar.setCurrentWidget(self.sidebar.newEntryView)
+    
+    def addNewEntry(self):
+        # Get entry contents
+        entryName = self.entryNameEdit_2.text()
+        entryType = self.entryTypeCombo.currentText()
+        entryDescription = self.entryDescriptionEdit_2.text()
+        entryContent = self.entryContentEdit_2.text() # ! TODO echo password
+        if (entryName == "" or entryType == "" or entryDescription == "" or entryContent == ""):
+            return
+        information = f"{entryName},{entryType},{entryDescription},{entryContent}"
+
+        crud.create(2, self.username, self.password, information)
+        self.entryNameEdit_2.setText("")
+        self.entryTypeCombo.setCurrentIndex(0)
+        self.entryDescriptionEdit_2.setText("")
+        self.entryContentEdit_2.setText("") # ! TODO echo password
+        # Reload Table to update
+        self.updateTable()
+
+    # Entry Deletion
     def deleteEntry(self, row):
-        # Delete from table
-
         # Delete from file
-        pass
+        crud.delete(2, self.username, self.password, row+1)
+        self.loadDefault
+        self.updateTable()
 
-    def editEntry(self, row):
-        # Enable all line edits
+    # Edit -> Enable widgets -> wait for confirm button -> edit the entry
+    def editEntryEnable(self, row):
+        print(row)
+        # Enable all editable widgets
+        oldInformation = "{},{},{},{},".format(self.entryNameEdit.text(), self.entryTypeCombo_2.currentText(), self.entryDescriptionEdit.text(), self.entryContentEdit.text())
+        print(oldInformation)
+        self.entryNameEdit.setEnabled(True)
+        self.entryTypeCombo_2.setEnabled(True)
+        self.entryDescriptionEdit.setEnabled(True)
+        self.entryContentEdit.setEnabled(True)
 
-        # Edit file
-        pass
+        # TODO ! Disable table and other buttons
 
+        # Enable Button
+        self.editButton.setText("Save")
+        self.deleteButton.setText("Cancel")
+        #self.editButton.clicked.connect(self.editEntry(oldInformation, row))
+        self.deleteButton.clicked.connect(self.editEntryCancel)
+        return 1
 
+    def editEntryCancel(self):
+        self.entryNameEdit_2.setEnabled(False)
+        self.entryTypeCombo.setEnabled(False)
+        self.entryDescriptionEdit_2.setEnabled(False)
+        self.entryContentEdit_2.setEnabled(False)
+
+        self.editButton.setText("Edit")
+        self.deleteButton.setText("Delete")
+        #self.deleteButton.clicked.connect(self.deleteEntry)
+        #self.editButton.clicked.connect(self.editEntry)
+
+    def editEntry(self, information, row):
+        newInformation = "{},{},{},{},".format(self.entryNameEdit_2.text(), self.entryTypeCombo.currentText(), self.entryDescriptionEdit_2.text(), self.entryContentEdit_2.text())
+        print(newInformation)
+        crud.update(3, self.username, self.password, information, newInformation, row+1)
+        self.updateTable()
+        self.loadDefault()
+
+    # User Settings
     def loadSettingsView(self):
         self.sidebar.setCurrentWidget(self.sidebar.userSettingView)
 
@@ -259,25 +312,43 @@ class MainScreen(QtWidgets.QMainWindow):
         self.sidebar.setCurrentWidget(self.sidebar.passwordChangeView)
     
     def deleteAccount(self):
-        pass
-
+        oldPassword = self.password
+        password = self.passwordEdit.text()
+        if oldPassword != password:
+            self.errorMessageLabel.setText("Invalid!")
+        else:
+            self.errorMessageLabel.setText("")
+            crud.delete(1, self.username, self.password)
+            self.logout()
+            
     def changePassword(self):
-        pass
+        oldPassword = self.oldPasswordEdit.text()
+        password = self.newPasswordEdit.text()
+        if oldPassword != self.password:
+            self.errorMessageLabel_2.setText("Invalid!")
+        else:
+            self.errorMessageLabel_2.setText("")
+            self.refreshUserEntries(password)
+            crud.update(1, self.username, self.password, self.password, password)
+            self.password = password
+            self.updateTable()
 
-    def loadNewEntryView(self):
-        self.sidebar.setCurrentWidget(self.sidebar.newEntryView)
-    
-    def addNewEntry(self):
-        pass
+    def refreshUserEntries(self, newPassword):
+        # Re Encrypt All entries with new password
+        informationSet : str = crud.read(6, self.username, self.password)
+        crud.delete(3, self.username, self.password)
+        crud.create(2, self.username, newPassword, informationSet)
 
-
+# def main(): 
 app = QApplication(sys.argv)
 widget = QtWidgets.QStackedWidget()
 loginScreen = LoginScreen()
 # TODO ! just set size constraints
-main = MainScreen()
+#main = MainScreen()
 widget.addWidget(loginScreen)
-widget.addWidget(main)
+#widget.addWidget(main)
 widget.setCurrentIndex(0)
 widget.show()
 sys.exit(app.exec())
+
+# main()
