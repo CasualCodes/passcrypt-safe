@@ -660,6 +660,9 @@ font: 18pt &quot;Montserrat&quot;;</string>
              <property name="frame">
               <bool>false</bool>
              </property>
+             <property name="echoMode">
+              <enum>QLineEdit::Password</enum>
+             </property>
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
              </property>
@@ -699,6 +702,9 @@ font: 18pt &quot;Montserrat&quot;;</string>
              </property>
              <property name="frame">
               <bool>false</bool>
+             </property>
+             <property name="echoMode">
+              <enum>QLineEdit::Password</enum>
              </property>
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -884,6 +890,9 @@ font: 18pt &quot;Montserrat&quot;;</string>
              </property>
              <property name="frame">
               <bool>false</bool>
+             </property>
+             <property name="echoMode">
+              <enum>QLineEdit::Password</enum>
              </property>
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

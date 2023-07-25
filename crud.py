@@ -99,6 +99,7 @@ def read(readFunc : int, username : str = "default", password : str = "default",
 
             # DECRYPT
             decryptFile = encryption.decrypt(key, userEntriesMode, userEntriesPath.format(username))
+            #print(decryptFile)
             informationSet = decryptFile.split(",")
             returnInformation = ""
 
@@ -180,8 +181,7 @@ def read(readFunc : int, username : str = "default", password : str = "default",
 
             # DECRYPT
             decryptFile = encryption.decrypt(key, userEntriesMode, userEntriesPath.format(username))
-            informationSet = decryptFile.split(",")
-            returnInformation = informationSet
+            returnInformation = decryptFile
 
             return returnInformation
         
@@ -201,12 +201,12 @@ def update(updateFunc : int, username : str, password : str, informationToChange
                 # check username and password
                 if (username == user):
                     userCheck = True
-                    print("Username exists at {}".format(users.index(user)))
+                    #print("Username exists at {}".format(users.index(user)))
                     continue
                 elif (userCheck == True and informationToChange == user):
-                    print ("Account Exists. Password verified at {}".format(users.index(user)))
+                    #print ("Account Exists. Password verified at {}".format(users.index(user)))
                     users[users.index(user)] = newInformation
-                    print("Password Changed")
+                    #print("Password Changed")
                 else:
                     userCheck = False
             
@@ -231,7 +231,7 @@ def update(updateFunc : int, username : str, password : str, informationToChange
 
             # TODO ??? Add Password Verification for authenticated password editing
             if (entryIndex == 4 and informationSet[editIndex] != informationToChange):
-                print("Old Password is Incorrect")
+                #print("Old Password is Incorrect")
                 return
             informationSet[editIndex] = newInformation
 
@@ -247,10 +247,13 @@ def update(updateFunc : int, username : str, password : str, informationToChange
             newInformationSplit = newInformation.split(",")
 
             startingIndex = (setIndex-1) * passwordIndex
+            #print(startingIndex)
             editIndex = startingIndex+3
+            #print(editIndex)
             index = 0
 
-            while (startingIndex<editIndex):
+            while (startingIndex<=editIndex):
+                #print(informationSet[startingIndex], newInformationSplit[index])
                 informationSet[startingIndex] = newInformationSplit[index]
                 startingIndex += 1
                 index += 1
@@ -259,6 +262,7 @@ def update(updateFunc : int, username : str, password : str, informationToChange
             for information in informationSet:
                 if(information != ""):
                     toEncrypt += "{},".format(information)
+            #print(toEncrypt)
             encryption.encrypt(key, userEntriesMode, userEntriesPath.format(username), toEncrypt)
 
 # *DELETE
@@ -280,10 +284,10 @@ def delete(delFunc : int, username, password, delIndex : int = 1):
                     continue
                 
                 elif (userCheck == True and password == user):
-                    print ("Account Exists. Password verified at {}".format(users.index(user)))
+                    #print ("Account Exists. Password verified at {}".format(users.index(user)))
                     users[users.index(user)-1] = ""
                     users[users.index(user)] = ""
-                    print("Account Deleted")
+                    #print("Account Deleted")
                 else:
                     userCheck = False
             

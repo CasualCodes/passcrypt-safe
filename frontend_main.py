@@ -11,7 +11,8 @@ from PyQt5.QtWidgets import QApplication
 
 # Progress
 # [*] Navigation
-# [~] Backend Integration
+# [*] Backend Integration
+# [] Flaw Analysis
 
 class LoginScreen(QtWidgets.QMainWindow):
     def __init__(self):
@@ -159,15 +160,15 @@ class MainScreen(QtWidgets.QMainWindow):
         self.tableWidget.cellClicked.connect(self.loadSelectedEntryView)
 
         # Sidebar
-
-
         # Delete Account View
         self.deleteAccountButton.clicked.connect(self.loadAccountDeleteView)
         self.cancelButton_2.clicked.connect(self.loadSettingsView)
+        self.confirmAccountDeleteButton.clicked.connect(lambda: self.deleteAccount())
 
         # Change Password View
         self.changePasswordButton.clicked.connect(self.loadPasswordChangeView)
         self.cancelButton.clicked.connect(self.loadSettingsView)
+        self.confirmChangeButton.clicked.connect(lambda: self.changePassword())
 
         # Add Entry View
         self.saveButton.clicked.connect(self.addNewEntry)
@@ -192,8 +193,8 @@ class MainScreen(QtWidgets.QMainWindow):
         row = 0
         self.tableWidget.setRowCount(rowCount)
         index = 0
-        print(input)
-        print(row, rowCount)
+        #print(input)
+        #print(row, rowCount)
         for row in range(rowCount):
             self.tableWidget.setItem(row, 0, QtWidgets.QTableWidgetItem(str(entries[index])))
             index += 1
@@ -204,14 +205,26 @@ class MainScreen(QtWidgets.QMainWindow):
             row += 1
 
     def updateTable(self):
-        #self.tableWidget.clearContents()
+        # Button Disconnections
+        try:
+            self.editButton.clicked.disconnect()
+            self.deleteButton.clicked.disconnect()
+        except:
+            pass
+
+        self.logoutButton.setEnabled(True)
+        self.userSettingsButton.setEnabled(True)
+        self.addEntryButton.setEnabled(True)
+        self.tableWidget.setEnabled(True)
+
+        self.tableWidget.clearContents()
         self.loadTable()
         self.loadDefault()
 
     # Selected Entry Sidebar
     def loadSelectedEntryView(self, row):
         # TODO ! Make Entry Content (contents) 'hidden' somehow
-        input = crud.read(3, self.username, self.password, row)
+        input = crud.read(3, self.username, self.password, row+1)
         entry = input.split(",")
 
         entryName = 0
@@ -230,8 +243,8 @@ class MainScreen(QtWidgets.QMainWindow):
         self.sidebar.selectedEntryView.entryContentEdit.setText(entry[entryContent])
         self.sidebar.setCurrentWidget(self.sidebar.selectedEntryView)
 
-        # Selected Entry View Buttons
-        # self.deleteButton.clicked.connect(self.deleteEntry(row))
+        # Enable Selected Entry View Buttons
+        self.deleteButton.clicked.connect(lambda: self.deleteEntry(row))
         self.editButton.clicked.connect(lambda: self.editEntryEnable(row))
 
     # New Entry Sidebar + add entry function
@@ -243,10 +256,10 @@ class MainScreen(QtWidgets.QMainWindow):
         entryName = self.entryNameEdit_2.text()
         entryType = self.entryTypeCombo.currentText()
         entryDescription = self.entryDescriptionEdit_2.text()
-        entryContent = self.entryContentEdit_2.text() # ! TODO echo password
+        entryContent = self.entryContentEdit_2.text()
         if (entryName == "" or entryType == "" or entryDescription == "" or entryContent == ""):
             return
-        information = f"{entryName},{entryType},{entryDescription},{entryContent}"
+        information = f"{entryName},{entryType},{entryDescription},{entryContent},"
 
         crud.create(2, self.username, self.password, information)
         self.entryNameEdit_2.setText("")
@@ -256,50 +269,65 @@ class MainScreen(QtWidgets.QMainWindow):
         # Reload Table to update
         self.updateTable()
 
-    # Entry Deletion
-    def deleteEntry(self, row):
+    #*# Entry Deletion
+    def deleteEntry(self, row): 
         # Delete from file
         crud.delete(2, self.username, self.password, row+1)
-        self.loadDefault
+        self.tableWidget.setRowCount(self.tableWidget.rowCount() - 1)
+        self.loadDefault()
         self.updateTable()
 
     # Edit -> Enable widgets -> wait for confirm button -> edit the entry
     def editEntryEnable(self, row):
-        print(row)
+        # print(row)
         # Enable all editable widgets
         oldInformation = "{},{},{},{},".format(self.entryNameEdit.text(), self.entryTypeCombo_2.currentText(), self.entryDescriptionEdit.text(), self.entryContentEdit.text())
-        print(oldInformation)
         self.entryNameEdit.setEnabled(True)
         self.entryTypeCombo_2.setEnabled(True)
         self.entryDescriptionEdit.setEnabled(True)
         self.entryContentEdit.setEnabled(True)
 
-        # TODO ! Disable table and other buttons
+        self.logoutButton.setEnabled(False)
+        self.userSettingsButton.setEnabled(False)
+        self.addEntryButton.setEnabled(False)
+        self.tableWidget.setEnabled(False)
 
         # Enable Button
         self.editButton.setText("Save")
         self.deleteButton.setText("Cancel")
-        #self.editButton.clicked.connect(self.editEntry(oldInformation, row))
-        self.deleteButton.clicked.connect(self.editEntryCancel)
-        return 1
+        self.deleteButton.clicked.disconnect()
+        self.editButton.clicked.disconnect()
+        self.editButton.clicked.connect(lambda: self.editEntry(oldInformation, row))
+        self.deleteButton.clicked.connect(lambda: self.editEntryCancel(oldInformation, row))
 
-    def editEntryCancel(self):
-        self.entryNameEdit_2.setEnabled(False)
-        self.entryTypeCombo.setEnabled(False)
-        self.entryDescriptionEdit_2.setEnabled(False)
-        self.entryContentEdit_2.setEnabled(False)
+    def editEntryCancel(self, oldInformation, row):
+        self.entryNameEdit.setEnabled(False)
+        self.entryTypeCombo_2.setEnabled(False)
+        self.entryDescriptionEdit.setEnabled(False)
+        self.entryContentEdit.setEnabled(False)
+
+        self.logoutButton.setEnabled(True)
+        self.userSettingsButton.setEnabled(True)
+        self.addEntryButton.setEnabled(True)
+        self.tableWidget.setEnabled(True)
 
         self.editButton.setText("Edit")
         self.deleteButton.setText("Delete")
-        #self.deleteButton.clicked.connect(self.deleteEntry)
-        #self.editButton.clicked.connect(self.editEntry)
+        self.editButton.clicked.disconnect()
+        self.deleteButton.clicked.disconnect()
+        self.deleteButton.clicked.connect(lambda: self.deleteEntry(row))
+        self.editButton.clicked.connect(lambda: self.editEntryEnable(row))
 
     def editEntry(self, information, row):
-        newInformation = "{},{},{},{},".format(self.entryNameEdit_2.text(), self.entryTypeCombo.currentText(), self.entryDescriptionEdit_2.text(), self.entryContentEdit_2.text())
-        print(newInformation)
+        newInformation = "{},{},{},{},".format(self.entryNameEdit.text(), self.entryTypeCombo_2.currentText(), self.entryDescriptionEdit.text(), self.entryContentEdit.text())
+        self.entryNameEdit.setText("") 
+        self.entryTypeCombo_2.setCurrentIndex(0) 
+        self.entryDescriptionEdit.setText("")
+        self.entryContentEdit.setText("")
+        self.editButton.setText("Edit")
+        self.deleteButton.setText("Delete")
         crud.update(3, self.username, self.password, information, newInformation, row+1)
         self.updateTable()
-        self.loadDefault()
 
     # User Settings
     def loadSettingsView(self):
