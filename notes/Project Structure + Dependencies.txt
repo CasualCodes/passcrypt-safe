@@ -10,6 +10,7 @@ root:
             os
             sys
             pathlib Path
+        [there could be some dependencies I forgot]
     # Data + Data/UserEntries (automatically created)
         users.bin file structure (decrypted)
             ------------
