@@ -1,0 +1,47 @@
+root:
+    # Dependencies
+        - Encryption for CRUD -
+            Crypto (from pycryptodome)
+        - Frontend -
+            PyQt5
+            PyQt5Designer
+            PyQt5Tools (not really used I think)
+        - CRUD -
+            os
+            sys
+            pathlib Path
+    # Data + Data/UserEntries (automatically created)
+        users.bin file structure (decrypted)
+            ------------
+            username,password,
+            ------------
+        username.bin file structure (decrypted):
+            -----------------
+            entryname,entrytype,entrydescription,entrycontents
+            -----------------
+    # UI Files (.ui files from QtDesigner)
+        Main Screen 
+        Login Screen
+    # Main Source Code    
+        frontend_main.py
+            -----------------
+            # Front End Code + Backend Calls
+            # Main
+            -----------------
+        crud.py
+            -----------------
+            # There are also calls here for encryption/decryption
+            create
+            read
+            update
+            delete
+            -----------------
+        encryption.py
+            -----------------
+            encrypt
+            decrypt
+            key generation
+            -----------------
+
+
+

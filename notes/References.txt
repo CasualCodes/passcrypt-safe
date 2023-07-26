@@ -1,0 +1,13 @@
+------------------------------------------
+QtWidgets Reference (List of methods and types) : https://www.riverbankcomputing.com/static/Docs/PyQt5/api/qtwidgets/qtwidgets-module.html
+NOTE : Does not contain description for majority of methods, but method names can be used to search at searchengines
+
+Other Docs:
+https://doc.qt.io/qtforpython-5/api.html
+https://www.riverbankcomputing.com/static/Docs/PyQt5/
+
+Main Tutorials Used as Reference:
+NeuralNine - https://www.youtube.com/watch?v=gyPuAJfOnGk&pp=ygUbcGFzc3dvcmQgbWFuYWdlciBweXRob24gYWVz
+Code First with Hala - https://www.youtube.com/watch?v=82v2ZR-g6wY&t=309s&pp=ygUUcHlxdDUgc3RhY2tlZCB3aWRnZXQ%3D
+Tech with Tim - https://www.youtube.com/watch?v=FVpho_UiDAY&pp=ygUOcHlxdDUgZGVzaWduZXI%3D
+[To be added]

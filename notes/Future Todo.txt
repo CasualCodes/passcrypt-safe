@@ -1,0 +1,13 @@
+Features to add for extension:
+[] fixing flaws
+[] data path choice for user
+[] comment removal
+[] filter implementation (requires index use and not relying on row for crud's setIndex)
+[To be added]
+
+Flaws:
+[] Lack of Proper Signup Page
+[] Not using lambda on some connects
+[] Lack of 'good' button/hover responses on UI
+[] Original Table Design is not followed
+[] Table Text is not visible

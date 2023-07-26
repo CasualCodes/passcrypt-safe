@@ -9,11 +9,6 @@ from PyQt5.QtWidgets import QApplication
 # Functions / Methods
 # Using loadUI due to mainly using QtDesigner for layout editing
 
-# Progress
-# [*] Navigation
-# [*] Backend Integration
-# [] Flaw Review
-
 class LoginScreen(QtWidgets.QMainWindow):
     def __init__(self):
         super(LoginScreen, self).__init__()
@@ -183,7 +178,7 @@ class MainScreen(QtWidgets.QMainWindow):
         widget.removeWidget(self)
         widget.setCurrentIndex(widget.currentIndex()-1)
     
-    # Table Display/Loading\
+    # Table Display/Loading
     def loadTable(self):
         input =  crud.read(2, self.username, self.password)
         if input == False:
@@ -269,7 +264,7 @@ class MainScreen(QtWidgets.QMainWindow):
         # Reload Table to update
         self.updateTable()
 
-    #*# Entry Deletion
+    # Entry Deletion
     def deleteEntry(self, row): 
         # Delete from file
         crud.delete(2, self.username, self.password, row+1)
@@ -371,10 +366,7 @@ class MainScreen(QtWidgets.QMainWindow):
 app = QApplication(sys.argv)
 widget = QtWidgets.QStackedWidget()
 loginScreen = LoginScreen()
-# TODO ! just set size constraints
-#main = MainScreen()
 widget.addWidget(loginScreen)
-#widget.addWidget(main)
 widget.setCurrentIndex(0)
 widget.show()
 sys.exit(app.exec())
