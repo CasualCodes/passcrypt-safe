@@ -1,4 +1,4 @@
-# Imports - to be polished
+# Imports
 import sys
 import crud
 import PyQt5
@@ -6,63 +6,68 @@ from PyQt5 import uic
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication
 
-# Functions / Methods
-# Using loadUI due to mainly using QtDesigner for layout editing
+# Using UIC LoadUI : Using .py for future changes is considered
 
+# Login Screen
 class LoginScreen(QtWidgets.QMainWindow):
     def __init__(self):
         super(LoginScreen, self).__init__()
         uic.loadUi("ui/LoginScreen.ui", self)
         
-        # References
+        # References to ui elements/widgets
         self.welcomeLabel = self.findChild(QtWidgets.QLabel, "welcomeLabel")
         self.usernameEdit = self.findChild(QtWidgets.QLineEdit, "usernameEdit")
         self.passwordEdit = self.findChild(QtWidgets.QLineEdit, "passwordEdit")
         self.loginButton = self.findChild(QtWidgets.QPushButton, "loginButton")
         self.signupButton = self.findChild(QtWidgets.QPushButton, "signupButton")
         
-        # Connections
+        # Button Connections
         self.loginButton.clicked.connect(self.login)
         self.signupButton.clicked.connect(self.signup)
 
-    # Functions
-    def login(self):
-        # Login Authentication/Verification
-        
-        if (self.getUsername() == "" or self.getPassword() == ""):
-            self.usernameEdit.setText("")
-            self.passwordEdit.setText("")
+    # Login
+    def login(self): 
+        if (self.emptyInputCheck()):
+            self.clearLineEdit()
             self.welcomeLabel.setText("Empty Input, Try Again")
             return
 
+        # Authentication Logic : If username and password is not found in the data file, consider it as incorrect password
+        # Can be edited if there are future crud / io overhauls
         passwordIncorrect = not crud.read(1, self.getUsername(), self.getPassword())
         if passwordIncorrect:
-            self.usernameEdit.setText("")
-            self.passwordEdit.setText("")
+            self.clearLineEdit()
             self.welcomeLabel.setText("Incorrect Password, Try Again")
         else:
             mainScreen = MainScreen(self.getUsername(), self.getPassword())
-            self.usernameEdit.setText("")
-            self.passwordEdit.setText("")
+            self.clearLineEdit()
             widget.addWidget(mainScreen)
             widget.setCurrentIndex(widget.currentIndex()+1)
 
-    def signup(self):
-        if (self.getUsername() == "" or self.getPassword() == ""):
-            self.usernameEdit.setText("")
-            self.passwordEdit.setText("")
+    # Sign Up
+    def signup(self): 
+        if (self.emptyInputCheck()):
+            self.clearLineEdit()
             self.welcomeLabel.setText("Empty Input, Try Again")
             return
         
-        # Signup Verification
+        # Verification Logic : If username and password is found in the datafile, consider it as existing account.
+        # There is no separate signup page for simplicity.
         accountAlreadyExists = crud.read(4, self.getUsername(), self.getPassword())
         if accountAlreadyExists:
-            self.usernameEdit.setText("")
-            self.passwordEdit.setText("")
+            self.clearLineEdit()
             self.welcomeLabel.setText("Account already exists, Try Again")
         else:
             crud.create(1, self.getUsername(), self.getPassword())
             self.welcomeLabel.setText("Account Successfully Created!")
+
+    # Helper Functions
+    def emptyInputCheck(self):
+        return self.getUsername() == "" or self.getPassword() == ""
+
+    def clearLineEdit(self):
+        self.usernameEdit.setText("")
+        self.passwordEdit.setText("")
 
     def getUsername(self):
         return self.usernameEdit.text()
@@ -70,25 +75,24 @@ class LoginScreen(QtWidgets.QMainWindow):
     def getPassword(self):
         return self.passwordEdit.text()
 
-
+# Main Screen
 class MainScreen(QtWidgets.QMainWindow):
     def __init__(self, username : str = "default", password : str = "default"): # Attempt for arguments in Main Screen
         super(MainScreen, self).__init__()
         uic.loadUi("ui/MainScreen.ui", self)
         self.username = username
         self.password = password
-        self.tableLoaded = False
+        self.tableLoaded = False # Legacy Variable
 
-        # References    
+        # References to ui elements / widgets (some are too long)
         # Topbar Elements
         self.welcomeLabel = self.findChild(QtWidgets.QLabel, "welcomeLabel")
-        
         self.addEntryButton = self.findChild(QtWidgets.QPushButton, "addEntryButton")
         self.logoutButton = self.findChild(QtWidgets.QPushButton, "logoutButton")
         self.userSettingsButton = self.findChild(QtWidgets.QPushButton, "userSettingsButton")
 
         # Table Section
-        self.filterCombo = self.findChild(QtWidgets.QComboBox, "filterCombo")
+        self.filterCombo = self.findChild(QtWidgets.QComboBox, "filterCombo") # UNUSED
         self.tableWidget = self.findChild(QtWidgets.QTableWidget, "tableWidget")
 
         # Sidebar Stacked Widget
@@ -145,7 +149,7 @@ class MainScreen(QtWidgets.QMainWindow):
         self.welcomeLabel.setText("Welcome! {}".format(self.username))
         self.loadTable()
 
-        # Connections
+        # Button Connections
         # Topbar
         self.addEntryButton.clicked.connect(self.loadNewEntryView)
         self.userSettingsButton.clicked.connect(self.loadSettingsView)
@@ -179,6 +183,8 @@ class MainScreen(QtWidgets.QMainWindow):
         widget.setCurrentIndex(widget.currentIndex()-1)
     
     # Table Display/Loading
+    # Logic : Get Information (a string of comma separated data) and divide it as data of the table
+    # Proposal : Using an index table may help with the filter function
     def loadTable(self):
         input =  crud.read(2, self.username, self.password)
         if input == False:
@@ -199,6 +205,7 @@ class MainScreen(QtWidgets.QMainWindow):
             index += 1
             row += 1
 
+    # Refreshes the Main Screen
     def updateTable(self):
         # Button Disconnections
         try:
@@ -260,16 +267,15 @@ class MainScreen(QtWidgets.QMainWindow):
         self.entryNameEdit_2.setText("")
         self.entryTypeCombo.setCurrentIndex(0)
         self.entryDescriptionEdit_2.setText("")
-        self.entryContentEdit_2.setText("") # ! TODO echo password
+        self.entryContentEdit_2.setText("")
         # Reload Table to update
         self.updateTable()
 
     # Entry Deletion
-    def deleteEntry(self, row): 
-        # Delete from file
+    def deleteEntry(self, row):
         crud.delete(2, self.username, self.password, row+1)
         self.tableWidget.setRowCount(self.tableWidget.rowCount() - 1)
-        self.loadDefault()
+        # self.loadDefault()
         self.updateTable()
 
     # Edit -> Enable widgets -> wait for confirm button -> edit the entry
@@ -313,6 +319,8 @@ class MainScreen(QtWidgets.QMainWindow):
         self.deleteButton.clicked.connect(lambda: self.deleteEntry(row))
         self.editButton.clicked.connect(lambda: self.editEntryEnable(row))
 
+    # Edit Logic : Replace old information with new information through the given row index
+    # WARNING : Using the row index may lead to problems in future features to implement when wanted (e.g. Filter)
     def editEntry(self, information, row):
         newInformation = "{},{},{},{},".format(self.entryNameEdit.text(), self.entryTypeCombo_2.currentText(), self.entryDescriptionEdit.text(), self.entryContentEdit.text())
         self.entryNameEdit.setText("") 

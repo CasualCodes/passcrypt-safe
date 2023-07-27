@@ -138,7 +138,7 @@ def read(readFunc : int, username : str = "default", password : str = "default",
 
             return returnInformation
 
-        case 4: # (Bool) Duplicate username check
+        case 4: # (Bool) Duplicate username check [LEGACY?]
             if (not fileExists(1)):
                 return False
             
@@ -154,7 +154,7 @@ def read(readFunc : int, username : str = "default", password : str = "default",
                     return True
 
             return False
-        case 5 : # (Int) Entry Count # NOT NEEDED FOR ACTUAL APP- ONLY FOR EXCEPTION HANDLING
+        case 5 : # (Int) Entry Count # NOT NEEDED FOR ACTUAL APP- ONLY FOR EXCEPTION HANDLING [LEGACY]
             if (not fileExists(2, username)):
                 return False
 

@@ -3,6 +3,8 @@ Features to add for extension:
 [] data path choice for user
 [] comment removal
 [] filter implementation (requires index use and not relying on row for crud's setIndex)
+-- will require dictionary / index use.
+
 [To be added]
 
 Flaws:

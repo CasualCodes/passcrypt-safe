@@ -1256,6 +1256,9 @@ font: 18pt &quot;Montserrat&quot;;</string>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
            <widget class="QComboBox" name="filterCombo">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(1, 31, 75);
 color: rgb(179, 205, 224);</string>
@@ -1265,17 +1268,12 @@ color: rgb(179, 205, 224);</string>
             </property>
             <item>
              <property name="text">
-              <string>All</string>
+              <string/>
              </property>
             </item>
             <item>
              <property name="text">
               <string>Account</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Note</string>
              </property>
             </item>
            </widget>
