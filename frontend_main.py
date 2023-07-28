@@ -147,7 +147,9 @@ class MainScreen(QtWidgets.QMainWindow):
 
         # Initialization
         self.welcomeLabel.setText("Welcome! {}".format(self.username))
-        self.loadTable()
+        self.entryCount = self.loadTable()
+        self.entryCountText = self.entryCountLabel.text()
+        self.entryCountLabel.setText("{} {}".format(self.entryCountText, self.entryCount))
 
         # Button Connections
         # Topbar
@@ -188,7 +190,7 @@ class MainScreen(QtWidgets.QMainWindow):
     def loadTable(self):
         input =  crud.read(2, self.username, self.password)
         if input == False:
-            return
+            return 0
         entries = input.split(",")
         rowCount = int(len(entries)/3)
         row = 0
@@ -204,6 +206,7 @@ class MainScreen(QtWidgets.QMainWindow):
             self.tableWidget.setItem(row, 2, QtWidgets.QTableWidgetItem(str(entries[index])))
             index += 1
             row += 1
+        return rowCount
 
     # Refreshes the Main Screen
     def updateTable(self):
@@ -220,7 +223,8 @@ class MainScreen(QtWidgets.QMainWindow):
         self.tableWidget.setEnabled(True)
 
         self.tableWidget.clearContents()
-        self.loadTable()
+        self.entryCount = self.loadTable()
+        self.entryCountLabel.setText("{} {}".format(self.entryCountText, self.entryCount))
         self.loadDefault()
 
     # Selected Entry Sidebar
